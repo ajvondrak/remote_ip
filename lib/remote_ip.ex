@@ -24,27 +24,28 @@ defmodule RemoteIp do
 
   def init(opts \\ []) do
     headers = Keyword.get(opts, :headers, @headers)
+    headers = MapSet.new(headers)
     proxies = Keyword.get(opts, :proxies, @proxies) ++ @reserved
     proxies = proxies |> Enum.map(&InetCidr.parse/1)
 
     {headers, proxies}
   end
 
-  def call(conn, {[], _proxies}) do
-    conn
-  end
-
-  def call(conn, {[header | next_headers], proxies}) when is_binary(header) do
-    case last_forwarded_ip(conn, header, proxies) do
-      nil -> call(conn, {next_headers, proxies})
+  def call(conn, {headers, proxies}) do
+    case last_forwarded_ip(conn, headers, proxies) do
+      nil -> conn
       ip  -> %{conn | remote_ip: ip}
     end
   end
 
-  defp last_forwarded_ip(conn, header, proxies) do
+  defp last_forwarded_ip(conn, headers, proxies) do
     conn
-    |> ips_from(header)
+    |> ips_from(headers)
     |> last_ip_forwarded_through(proxies)
+  end
+
+  defp ips_from(%Plug.Conn{req_headers: headers}, allowed) do
+    RemoteIp.Headers.parse(headers, allowed)
   end
 
   defp last_ip_forwarded_through(ips, proxies) do
@@ -59,17 +60,5 @@ defmodule RemoteIp do
 
   defp proxy?(ip, proxies) do
     Enum.any?(proxies, fn proxy -> InetCidr.contains?(proxy, ip) end)
-  end
-
-  defp ips_from(conn, "forwarded" = header) do
-    conn
-    |> Plug.Conn.get_req_header(header)
-    |> RemoteIp.Headers.Forwarded.parse
-  end
-
-  defp ips_from(conn, header) when is_binary(header) do
-    conn
-    |> Plug.Conn.get_req_header(header)
-    |> RemoteIp.Headers.Generic.parse
   end
 end

@@ -244,7 +244,7 @@ defmodule RemoteIpTest do
     assert {0xfe80, 0x0000, 0x0000, 0x0000, 0x0202, 0xb3ff, 0xfe1e, 0x8329} == conn |> remote_ip(proxies: ~w[fe00::/128])
   end
 
-  test "header priority" do
+  test "allowed headers" do
     conn = @conn
       |> put_req_header("a", "1.2.3.4")
       |> put_req_header("b", "2.3.4.5")
@@ -253,16 +253,16 @@ defmodule RemoteIpTest do
     assert :peer == conn |> remote_ip(headers: ~w[])
 
     assert {1, 2, 3, 4} == conn |> remote_ip(headers: ~w[a])
-    assert {1, 2, 3, 4} == conn |> remote_ip(headers: ~w[a b])
-    assert {1, 2, 3, 4} == conn |> remote_ip(headers: ~w[a c])
-    assert {1, 2, 3, 4} == conn |> remote_ip(headers: ~w[a b c])
-    assert {1, 2, 3, 4} == conn |> remote_ip(headers: ~w[a c b])
+    assert {2, 3, 4, 5} == conn |> remote_ip(headers: ~w[a b])
+    assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[a c])
+    assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[a b c])
+    assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[a c b])
 
     assert {2, 3, 4, 5} == conn |> remote_ip(headers: ~w[b])
     assert {2, 3, 4, 5} == conn |> remote_ip(headers: ~w[b a])
-    assert {2, 3, 4, 5} == conn |> remote_ip(headers: ~w[b c])
-    assert {2, 3, 4, 5} == conn |> remote_ip(headers: ~w[b a c])
-    assert {2, 3, 4, 5} == conn |> remote_ip(headers: ~w[b c a])
+    assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[b c])
+    assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[b a c])
+    assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[b c a])
 
     assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[c])
     assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[c a])
@@ -271,7 +271,7 @@ defmodule RemoteIpTest do
     assert {3, 4, 5, 6} == conn |> remote_ip(headers: ~w[c b a])
   end
 
-  test "header fallback" do
+  test "allowed headers maintain relative ordering" do
     headers = ~w[a b c]
 
     a = fn conn -> put_req_header(conn, "a", "1.2.3.4") end
@@ -281,21 +281,21 @@ defmodule RemoteIpTest do
     assert :peer == @conn |> remote_ip(headers: headers)
 
     assert {1, 2, 3, 4} == @conn |> a.() |> remote_ip(headers: headers)
-    assert {1, 2, 3, 4} == @conn |> a.() |> b.() |> remote_ip(headers: headers)
-    assert {1, 2, 3, 4} == @conn |> a.() |> c.() |> remote_ip(headers: headers)
-    assert {1, 2, 3, 4} == @conn |> a.() |> b.() |> c.() |> remote_ip(headers: headers)
-    assert {1, 2, 3, 4} == @conn |> a.() |> c.() |> b.() |> remote_ip(headers: headers)
+    assert {2, 3, 4, 5} == @conn |> a.() |> b.() |> remote_ip(headers: headers)
+    assert {3, 4, 5, 6} == @conn |> a.() |> c.() |> remote_ip(headers: headers)
+    assert {3, 4, 5, 6} == @conn |> a.() |> b.() |> c.() |> remote_ip(headers: headers)
+    assert {2, 3, 4, 5} == @conn |> a.() |> c.() |> b.() |> remote_ip(headers: headers)
 
     assert {2, 3, 4, 5} == @conn |> b.() |> remote_ip(headers: headers)
     assert {1, 2, 3, 4} == @conn |> b.() |> a.() |> remote_ip(headers: headers)
-    assert {2, 3, 4, 5} == @conn |> b.() |> c.() |> remote_ip(headers: headers)
-    assert {1, 2, 3, 4} == @conn |> b.() |> a.() |> c.() |> remote_ip(headers: headers)
+    assert {3, 4, 5, 6} == @conn |> b.() |> c.() |> remote_ip(headers: headers)
+    assert {3, 4, 5, 6} == @conn |> b.() |> a.() |> c.() |> remote_ip(headers: headers)
     assert {1, 2, 3, 4} == @conn |> b.() |> c.() |> a.() |> remote_ip(headers: headers)
 
     assert {3, 4, 5, 6} == @conn |> c.() |> remote_ip(headers: headers)
     assert {1, 2, 3, 4} == @conn |> c.() |> a.() |> remote_ip(headers: headers)
     assert {2, 3, 4, 5} == @conn |> c.() |> b.() |> remote_ip(headers: headers)
-    assert {1, 2, 3, 4} == @conn |> c.() |> a.() |> b.() |> remote_ip(headers: headers)
+    assert {2, 3, 4, 5} == @conn |> c.() |> a.() |> b.() |> remote_ip(headers: headers)
     assert {1, 2, 3, 4} == @conn |> c.() |> b.() |> a.() |> remote_ip(headers: headers)
   end
 end

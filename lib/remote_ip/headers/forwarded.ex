@@ -1,13 +1,11 @@
 defmodule RemoteIp.Headers.Forwarded do
   use Combine
 
-  def parse(headers) when is_list(headers) do
-    Enum.flat_map(headers, fn header ->
-      case Combine.parse(header, forwarded) do
-        [elements] -> Enum.flat_map(elements, &parse_forwarded_for/1)
-        _          -> []
-      end
-    end)
+  def parse(header) when is_binary(header) do
+    case Combine.parse(header, forwarded) do
+      [elements] -> Enum.flat_map(elements, &parse_forwarded_for/1)
+      _          -> []
+    end
   end
 
   defp parse_forwarded_for(pairs) do

@@ -1,14 +1,12 @@
 defmodule RemoteIp.Headers.Generic do
-  def parse(headers) when is_list(headers) do
-    headers
+  def parse(header) when is_binary(header) do
+    header
     |> split_commas
     |> parse_ips
   end
 
-  defp split_commas(headers) do
-    Enum.flat_map(headers, fn header ->
-      header |> String.trim |> String.split(~r/\s*,\s*/)
-    end)
+  defp split_commas(header) do
+    header |> String.trim |> String.split(~r/\s*,\s*/)
   end
 
   defp parse_ips(strings) do
