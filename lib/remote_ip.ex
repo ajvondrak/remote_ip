@@ -4,10 +4,9 @@ defmodule RemoteIp do
   @headers ~w[
     forwarded
     x-forwarded-for
+    x-client-ip
+    x-real-ip
   ]
-  # x-client-ip
-  # x-real-ip
-  # etc
 
   @proxies []
 
