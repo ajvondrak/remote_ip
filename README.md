@@ -2,7 +2,7 @@
 
 A [plug](https://github.com/elixir-lang/plug) to overwrite the [`Conn`'s](https://hexdocs.pm/plug/Plug.Conn.html) `remote_ip` based on headers such as `X-Forwarded-For`.
 
-IPs are processed last-to-first to prevent IP spoofing, as thoroughly explained in [a blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) by @gingerlime. Loopback/private IPs are always ignored and known proxies are configurable, so neither type will be erroneously treated as the original client IP. You can configure any number of arbitrary forwarding headers to use. If there's a special way to parse your particular header, the architecture of this project should [make it easy](#Contributing) to open a pull request so `RemoteIp` can accommodate.
+IPs are processed last-to-first to prevent IP spoofing, as thoroughly explained in [a blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) by [@gingerlime](https://github.com/gingerlime). Loopback/private IPs are always ignored and known proxies are configurable, so neither type will be erroneously treated as the original client IP. You can configure any number of arbitrary forwarding headers to use. If there's a special way to parse your particular header, the architecture of this project should [make it easy](#Contributing) to open a pull request so `RemoteIp` can accommodate.
 
 **If your app is not behind at least one proxy, you should not use this plug.** See [below](#Algorithm) for more detailed reasoning.
 
@@ -67,11 +67,11 @@ Note that the field is _meant_ to be overwritten. Plug does not actually do any 
 
 > Because each server's proxy situation differs, it is better that this function is implemented by the application directly.
 
-**Solution:** As definitively verified in https://github.com/elixir-lang/plug/issues/319, users are intended to hand-roll their own header parsers.
+**Solution:** As definitively verified in [elixir-lang/plug#319](https://github.com/elixir-lang/plug/issues/319), users are intended to hand-roll their own header parsers.
 
 ### Problem: Ain't nobody got time for that.
 
-**Solution:** There are a handful of plugs available on [Hex](https://hex.pm). There are also the comments left in the https://github.com/elixir-lang/plug/issues/319 thread that may give you some ideas, but I consider them to be non-starters - copying/pasting code from github comments isn't much better than hand-rolling an implementation.
+**Solution:** There are a handful of plugs available on [Hex](https://hex.pm). There are also the comments left in the [elixir-lang/plug#319](https://github.com/elixir-lang/plug/issues/319) thread that may give you some ideas, but I consider them to be non-starters - copying/pasting code from github comments isn't much better than hand-rolling an implementation.
 
 ### Problem: Existing solutions are incomplete and have subtle bugs.
 
@@ -171,13 +171,13 @@ These IPs are filtered because they are used internally and are thus guaranteed 
 
 Thus, `RemoteIp` processes the request from 4.4.4.4 with the first-to-last list of forwarded IPs
 
-```
+```elixir
 [{1, 1, 1, 1}, {3, 3, 3, 3}, {2, 2, 2, 2}] # what we get
 ```
 
 even though the _actual_ order was
 
-```
+```elixir
 [{1, 1, 1, 1}, {2, 2, 2, 2}, {3, 3, 3, 3}] # actual forwarding order
 ```
 
@@ -206,7 +206,7 @@ While `RemoteIp` has morphed into something distinct from the Rails middleware o
 
 Required reading for anyone who wants to think way too much about forwarding headers:
 
-* @gingerlime's [blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) explaining IP spoofing
+* [@gingerlime](https://github.com/gingerlime)'s [blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) explaining IP spoofing
 * Rails' [`RemoteIp` middleware](https://github.com/rails/rails/blob/v4.1.4/actionpack/lib/action_dispatch/middleware/remote_ip.rb)
 * Rails' [tests](https://github.com/rails/rails/blob/92703a9ea5d8b96f30e0b706b801c9185ef14f0e/actionpack/test/dispatch/request_test.rb#L62)
-* The extensive discussion on https://github.com/rails/rails/pull/7980
+* The extensive discussion on [rails/rails#7980](https://github.com/rails/rails/pull/7980)
