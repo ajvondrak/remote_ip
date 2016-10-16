@@ -194,7 +194,11 @@ If there's some header that `RemoteIp` does not parse properly, support is easy 
 5. Add a clause to the private function `RemoteIp.Headers.parse_ips/1` that calls `RemoteIp.Headers.YourNewHeader.parse`.
 6. Open a pull request!
 
-For an example of just such an extension, check out the implementation of `RemoteIp.Headers.Forwarded`.
+For an example of just such an extension, check out:
+
+* [`RemoteIp.Headers.Forwarded`](https://github.com/ajvondrak/remote_ip/blob/master/lib/remote_ip/headers/forwarded.ex)
+* [`RemoteIp.Headers.ForwardedTest`](https://github.com/ajvondrak/remote_ip/blob/master/test/remote_ip/headers/forwarded_test.exs)
+* [The corresponding `RemoteIp.Headers.parse_ips/1` clause](https://github.com/ajvondrak/remote_ip/blob/ab2d6fe17ea7361dd998e3d0664142f2b4c8b2ea/lib/remote_ip/headers.ex#L16-L18)
 
 If there's demand, I'm open to `RemoteIp` supporting user-configurable parsers. For now, I think the pull request workflow should be sufficient.
 
