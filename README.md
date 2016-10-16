@@ -2,9 +2,9 @@
 
 A [plug](https://github.com/elixir-lang/plug) to overwrite the [`Conn`'s](https://hexdocs.pm/plug/Plug.Conn.html) `remote_ip` based on headers such as `X-Forwarded-For`.
 
-IPs are processed last-to-first to prevent IP spoofing, as thoroughly explained in [a blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) by [@gingerlime](https://github.com/gingerlime). Loopback/private IPs are always ignored and known proxies are configurable, so neither type will be erroneously treated as the original client IP. You can configure any number of arbitrary forwarding headers to use. If there's a special way to parse your particular header, the architecture of this project should [make it easy](#Contributing) to open a pull request so `RemoteIp` can accommodate.
+IPs are processed last-to-first to prevent IP spoofing, as thoroughly explained in [a blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) by [@gingerlime](https://github.com/gingerlime). Loopback/private IPs are always ignored and known proxies are configurable, so neither type will be erroneously treated as the original client IP. You can configure any number of arbitrary forwarding headers to use. If there's a special way to parse your particular header, the architecture of this project should [make it easy](#contributing) to open a pull request so `RemoteIp` can accommodate.
 
-**If your app is not behind at least one proxy, you should not use this plug.** See [below](#Algorithm) for more detailed reasoning.
+**If your app is not behind at least one proxy, you should not use this plug.** See [below](#algorithm) for more detailed reasoning.
 
 ## Installation
 
@@ -101,7 +101,7 @@ There are 2 main tasks this plug has to do:
 
 ### Parsing Headers
 
-When `RemoteIp` parses the `Conn`'s `req_headers`, it first selects only the headers specified in the [`:headers` option](#Usage). Their relative ordering is maintained, because order matters when there are multiple hops between proxies. Consider this request:
+When `RemoteIp` parses the `Conn`'s `req_headers`, it first selects only the headers specified in the [`:headers` option](#usage). Their relative ordering is maintained, because order matters when there are multiple hops between proxies. Consider this request:
 
 * Client at IP 1.2.3.4 sends an HTTP request to Proxy 1 (no forwarding headers)
 * Proxy 1 at IP 1.1.1.1 adds a `Forwarded: for=1.2.3.4` header and forwards to Proxy 2
@@ -122,7 +122,7 @@ Thus, if `RemoteIp` is configured to accept both `Forwarded` and `X-Forwarded-Fo
 
 After selecting the allowed headers, each string is parsed for its IP addresses (each IP address being the [tuple returned by `:inet` functions](http://erlang.org/doc/man/inet.html#type-ip_address)). Each type of header may be parsed in a different way. For instance, `Forwarded` has a key-value pair format specified by RFC 7239, whereas `X-Forwarded-For` contains a comma-separate list of IPs.
 
-Currently, `Forwarded` is the only header with a format specifically recognized by `RemoteIp`. All other headers are parsed _generically_. That is, they are parsed as comma-separated IPs. This should work for `X-Forwarded-For` and, as far as I can tell, `X-Real-IP` & `X-Client-IP` as well. New formats are [easy to add](#Contributing) - pull requests welcome.
+Currently, `Forwarded` is the only header with a format specifically recognized by `RemoteIp`. All other headers are parsed _generically_. That is, they are parsed as comma-separated IPs. This should work for `X-Forwarded-For` and, as far as I can tell, `X-Real-IP` & `X-Client-IP` as well. New formats are [easy to add](#contributing) - pull requests welcome.
 
 ### Computing the IP
 
@@ -135,7 +135,7 @@ With the list of IPs parsed, `RemoteIp` must then calculate the proper `remote_i
 To [prevent IP spoofing](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/), IPs are processed right-to-left. You can think of it as working backwards through the chain of hops:
 
 1. The `2.2.2.2 -> 3.3.3.3` hop set `X-Forwarded-For: 1.1.1.1`. Do we trust this header? **Yes**, because `RemoteIp` assumes that there is _at least_ one proxy sitting between your app & the client that sets a forwarding header, meaning that 2.2.2.2 is tacitly a "known" proxy.
-2. The `1.1.1.1 -> 2.2.2.2` hop set `Forwarded: for=1.2.3.4`. Do we trust this header? **It depends**, because we would need to configure `RemoteIp` with the [`:proxies` option](#Usage) to know that 1.1.1.1 is a proxy. If we didn't, we wouldn't trust the header, and thus should stop here and say the original client was at 1.1.1.1. Otherwise, we should keep working backwards through the hops. Assuming we do...
+2. The `1.1.1.1 -> 2.2.2.2` hop set `Forwarded: for=1.2.3.4`. Do we trust this header? **It depends**, because we would need to configure `RemoteIp` with the [`:proxies` option](#usage) to know that 1.1.1.1 is a proxy. If we didn't, we wouldn't trust the header, and thus should stop here and say the original client was at 1.1.1.1. Otherwise, we should keep working backwards through the hops. Assuming we do...
 3. The `1.2.3.4 -> 1.1.1.1` hop set no headers, so we've arrived at the original client address, 1.2.3.4.
 
 Now suppose a client was trying to spoof the IP by setting their own `X-Forwarded-For` header:
