@@ -5,15 +5,13 @@ defmodule RemoteIp.Mixfile do
     [app: :remote_ip,
      version: "0.1.0",
      elixir: "~> 1.3",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
+     package: package,
      description: description,
-     deps: deps]
+     deps: deps,
+     docs: [source_url: "https://github.com/ajvondrak/remote_ip"]]
   end
 
-  def application do
-    [applications: [:plug]]
-  end
+  def application, do: [applications: []]
 
   defp description do
     """
@@ -22,9 +20,17 @@ defmodule RemoteIp.Mixfile do
     """
   end
 
+  defp package do
+    %{files: ~w[lib mix.exs README.md LICENSE],
+      maintainers: ["Alex Vondrak"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/ajvondrak/remote_ip"}}
+  end
+
   defp deps do
     [{:combine, "~> 0.9.2"},
-     {:plug, "~> 1.0"},
-     {:inet_cidr, "~> 1.0"}]
+     {:plug, "~> 1.2"},
+     {:inet_cidr, "~> 1.0"},
+     {:ex_doc, "~> 0.14", only: :dev}]
   end
 end
