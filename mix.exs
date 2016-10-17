@@ -14,10 +14,8 @@ defmodule RemoteIp.Mixfile do
   def application, do: [applications: []]
 
   defp description do
-    """
-    A plug to overwrite the Conn's remote_ip based on headers such as
-    X-Forwarded-For.
-    """
+    "A plug to overwrite the Conn's remote_ip based on headers such as " <>
+    "X-Forwarded-For."
   end
 
   defp package do
