@@ -2,6 +2,8 @@ defmodule RemoteIp.Headers.ForwardedTest do
   use ExUnit.Case, async: true
   alias RemoteIp.Headers.Forwarded
 
+  doctest Forwarded
+
   describe "parsing" do
     test "RFC 7239 examples" do
       parsed = Forwarded.parse(~S'for="_gazonk"')

@@ -1,4 +1,46 @@
 defmodule RemoteIp do
+  @moduledoc """
+  A plug to overwrite the `Plug.Conn`'s `remote_ip` based on headers such as
+  `X-Forwarded-For`.
+
+  To use, add the `RemoteIp` plug to your app's plug pipeline:
+
+  ```elixir
+  defmodule MyApp do
+    use Plug.Builder
+
+    plug RemoteIp
+  end
+  ```
+
+  There are 2 options that can be passed in:
+
+  * `:headers` - A list of strings naming the `req_headers` to use when
+    deriving the `remote_ip`. Order does not matter. Defaults to `~w[forwarded
+    x-forwarded-for x-client-ip x-real-ip]`.
+
+  * `:proxies` - A list of strings in
+    [CIDR](https://en.wikipedia.org/wiki/CIDR) notation specifying the IPs of
+    known proxies. Defaults to `[]`.
+
+  For example, if you know you are behind proxies in the IP block 1.2.x.x that
+  use the `X-Foo`, `X-Bar`, and `X-Baz` headers, you could say
+
+  ```elixir
+  defmodule MyApp do
+    use Plug.Builder
+
+    plug RemoteIp, headers: ~w[x-foo x-bar x-baz], proxies: ~w[1.2.0.0/16]
+  end
+  ```
+
+  Note that, due to limitations in the
+  [inet_cidr](https://github.com/Cobenian/inet_cidr) library used to parse
+  them, `:proxies` **must** be written in full CIDR notation, even if
+  specifying just a single IP. So instead of `"127.0.0.1"` and `"a:b::c:d"`,
+  you would use `"127.0.0.1/32"` and `"a:b::c:d/128"`.
+  """
+
   @behaviour Plug
 
   @headers ~w[
