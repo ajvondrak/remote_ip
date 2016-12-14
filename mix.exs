@@ -3,7 +3,7 @@ defmodule RemoteIp.Mixfile do
 
   def project do
     [app: :remote_ip,
-     version: "0.1.0",
+     version: "0.1.1",
      elixir: "~> 1.3",
      package: package,
      description: description,
@@ -11,7 +11,10 @@ defmodule RemoteIp.Mixfile do
      docs: [source_url: "https://github.com/ajvondrak/remote_ip"]]
   end
 
-  def application, do: [applications: []]
+  def application do
+    [applications: [],
+     included_applications: [:inet_cidr]]
+  end
 
   defp description do
     "A plug to overwrite the Conn's remote_ip based on headers such as " <>
