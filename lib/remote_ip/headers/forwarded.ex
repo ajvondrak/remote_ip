@@ -27,7 +27,7 @@ defmodule RemoteIp.Headers.Forwarded do
   @spec parse(header) :: [ip]
 
   def parse(header) when is_binary(header) do
-    case Combine.parse(header, forwarded) do
+    case Combine.parse(header, forwarded()) do
       [elements] -> Enum.flat_map(elements, &parse_forwarded_for/1)
       _          -> []
     end
@@ -45,7 +45,7 @@ defmodule RemoteIp.Headers.Forwarded do
   end
 
   defp parse_ip(string) do
-    case Combine.parse(string, ip_address) do
+    case Combine.parse(string, ip_address()) do
       [ip] -> [ip]
       _    -> []
     end
@@ -54,20 +54,20 @@ defmodule RemoteIp.Headers.Forwarded do
   # https://tools.ietf.org/html/rfc7239#section-4
 
   defp forwarded do
-    sep_by(forwarded_element, comma) |> eof
+    sep_by(forwarded_element(), comma()) |> eof
   end
 
   defp forwarded_element do
-    sep_by1(forwarded_pair, char(";"))
+    sep_by1(forwarded_pair(), char(";"))
   end
 
   defp forwarded_pair do
-    pair = [token, ignore(char("=")), value]
+    pair = [token(), ignore(char("=")), value()]
     pipe(pair, &List.to_tuple/1)
   end
 
   defp value do
-    either(token, quoted_string)
+    either(token(), quoted_string())
   end
 
   # https://tools.ietf.org/html/rfc7230#section-3.2.6
@@ -77,7 +77,7 @@ defmodule RemoteIp.Headers.Forwarded do
   end
 
   defp quoted_string do
-    quoted(string_of(either(qdtext, quoted_pair)))
+    quoted(string_of(either(qdtext(), quoted_pair())))
   end
 
   defp quoted(parser) do
@@ -98,36 +98,36 @@ defmodule RemoteIp.Headers.Forwarded do
          |> Enum.map(&<<&1::utf8>>)
 
   defp quoted_pair do
-    ignore(char("\\")) |> one_of(char, @quotable)
+    ignore(char("\\")) |> one_of(char(), @quotable)
   end
 
   # https://tools.ietf.org/html/rfc7230#section-7
 
   defp comma do
-    skip(many(either(space, tab)))
+    skip(many(either(space(), tab())))
     |> char(",")
-    |> skip(many(either(space, tab)))
+    |> skip(many(either(space(), tab())))
   end
 
   # https://tools.ietf.org/html/rfc7239#section-6
 
   defp ip_address do
-    node_name
+    node_name()
     |> ignore(option(ignore(char(":")) |> node_port))
     |> eof
   end
 
   defp node_name do
     choice [
-      ipv4_address,
-      between(char("["), ipv6_address, char("]")),
+      ipv4_address(),
+      between(char("["), ipv6_address(), char("]")),
       ignore(string("unknown")),
-      ignore(obfuscated),
+      ignore(obfuscated()),
     ]
   end
 
   defp node_port(previous) do
-    previous |> either(port, obfuscated)
+    previous |> either(port(), obfuscated())
   end
 
   defp port do
