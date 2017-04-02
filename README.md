@@ -28,6 +28,8 @@ defmodule MyApp do
 end
 ```
 
+Keep in mind the order of plugs in your pipeline and place `RemoteIp` as early as possible. For example, if you were to add `RemoteIp` *after* [the Plug Router](https://github.com/elixir-lang/plug#the-plug-router), your route action's logic would be executed *before* the `remote_ip` actually gets modified - not very useful!
+
 There are 2 options that can be passed in:
 
 * `:headers` - A list of strings naming the `req_headers` to use when deriving the `remote_ip`. Order does not matter. Defaults to `~w[forwarded x-forwarded-for x-client-ip x-real-ip]`.
