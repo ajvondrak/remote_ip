@@ -29,7 +29,7 @@ defmodule RemoteIp.Mixfile do
   end
 
   defp deps do
-    [{:combine, "~> 0.9.2"},
+    [{:combine, "~> 0.10"},
      {:plug, "~> 1.2"},
      {:inet_cidr, "~> 1.0"},
      {:ex_doc, "~> 0.14", only: :dev}]
