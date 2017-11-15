@@ -148,7 +148,7 @@ defmodule RemoteIp.Headers.Forwarded do
 
   defp ipv4_address do
     map(word_of(~r/[0-9.]/), fn string ->
-      case :inet.parse_ipv4strict_address(string |> to_char_list) do
+      case :inet.parse_ipv4strict_address(string |> to_charlist) do
         {:ok, ip}         -> ip
         {:error, :einval} -> {:error, "Invalid IPv4 address"}
       end
@@ -157,7 +157,7 @@ defmodule RemoteIp.Headers.Forwarded do
 
   defp ipv6_address do
     map(word_of(~r/[0-9a-f:.]/i), fn string ->
-      case :inet.parse_ipv6strict_address(string |> to_char_list) do
+      case :inet.parse_ipv6strict_address(string |> to_charlist) do
         {:ok, ip}         -> ip
         {:error, :einval} -> {:error, "Invalid IPv6 address"}
       end

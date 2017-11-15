@@ -50,6 +50,6 @@ defmodule RemoteIp.Headers.Generic do
   end
 
   defp parse_ip(string) do
-    string |> to_char_list |> :inet.parse_strict_address
+    string |> to_charlist |> :inet.parse_strict_address
   end
 end
