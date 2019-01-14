@@ -1,7 +1,8 @@
 defmodule RemoteIp do
   @moduledoc """
   A plug to overwrite the `Plug.Conn`'s `remote_ip` based on headers such as
-  `X-Forwarded-For`.
+  `X-Forwarded-For`. The `last_forwarded_ip/2` function can be used directly
+  for usage outside of plug.
 
   To use, add the `RemoteIp` plug to your app's plug pipeline:
 
@@ -73,20 +74,24 @@ defmodule RemoteIp do
   end
 
   def call(conn, {headers, proxies}) do
-    case last_forwarded_ip(conn, headers, proxies) do
+    case last_forwarded_ip(conn.req_headers, headers: headers, proxies: proxies) do
       nil -> conn
       ip  -> %{conn | remote_ip: ip}
     end
   end
 
-  defp last_forwarded_ip(conn, headers, proxies) do
-    conn
-    |> ips_from(headers)
-    |> last_ip_forwarded_through(proxies)
-  end
+  @doc """
+  Given a list of headers, return the last ip address.
+  """
+  def last_forwarded_ip(req_headers, opts \\ []) do
+    headers =
+      Keyword.get(opts, :headers, @headers)
+      |> MapSet.new()
+    proxies = Keyword.get(opts, :proxies, @proxies) ++ @reserved
 
-  defp ips_from(%Plug.Conn{req_headers: headers}, allowed) do
-    RemoteIp.Headers.parse(headers, allowed)
+    req_headers
+    |> RemoteIp.Headers.parse(headers)
+    |> last_ip_forwarded_through(proxies)
   end
 
   defp last_ip_forwarded_through(ips, proxies) do

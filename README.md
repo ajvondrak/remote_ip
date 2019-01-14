@@ -48,6 +48,23 @@ end
 
 Note that, due to limitations in the [inet_cidr](https://github.com/Cobenian/inet_cidr) library used to parse them, `:proxies` **must** be written in full CIDR notation, even if specifying just a single IP. So instead of `"127.0.0.1"` and `"a:b::c:d"`, you would use `"127.0.0.1/32"` and `"a:b::c:d/128"`.
 
+### Without plug
+
+For usage outside of plug, there is the `RemoteIp.last_forwarded_ip/2` function, which can be used like so:
+
+```elixir
+RemoteIp.last_forwarded_ip([{"x-forwarded-for", "1.2.3.4"}]) => {1, 2, 3, 4}
+```
+
+The headers can also be customized like so:
+
+```elixir
+RemoteIp.last_forwarded_ip([{"x-foo", "1.2.3.4"}],
+  headers: ~w[x-foo x-bar x-baz],
+  proxies: ~w[1.2.0.0/16]
+) => {1, 2, 3, 4}
+
+
 ## Background
 
 ### Problem: Your app is behind a proxy and you want to know the original client's IP address.

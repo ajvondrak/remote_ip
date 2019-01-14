@@ -24,6 +24,17 @@ defmodule RemoteIpTest do
   #
   @conn %Plug.Conn{remote_ip: :peer}
 
+  describe "last_forwarded_ip/2" do
+    test "using the default options" do
+      assert RemoteIp.last_forwarded_ip([]) == nil
+      assert RemoteIp.last_forwarded_ip([{"x-forwarded-for", "1.2.3.4"}]) == {1, 2, 3, 4}
+    end
+
+    test "using custom headers" do
+      assert RemoteIp.last_forwarded_ip([{"x-custom", "1.2.3.4"}], headers: ["x-custom"]) == {1, 2, 3, 4}
+    end
+  end
+
   test "zero hops (i.e., no forwarding headers)" do
     assert :peer == @conn |> remote_ip
     assert :peer == @conn |> remote_ip(headers: ~w[])
