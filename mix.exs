@@ -4,7 +4,7 @@ defmodule RemoteIp.Mixfile do
   def project do
     [
       app: :remote_ip,
-      version: "0.1.5",
+      version: "0.1.6",
       elixir: "~> 1.7",
       package: package(),
       description: description(),
