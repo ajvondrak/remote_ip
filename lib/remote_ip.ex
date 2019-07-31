@@ -75,7 +75,7 @@ defmodule RemoteIp do
   def call(conn, {headers, proxies}) do
     case last_forwarded_ip(conn, headers, proxies) do
       nil -> conn
-      ip  -> %{conn | remote_ip: ip}
+      ip -> %{conn | remote_ip: ip}
     end
   end
 
@@ -91,7 +91,7 @@ defmodule RemoteIp do
 
   defp last_ip_forwarded_through(ips, proxies) do
     ips
-    |> Enum.reverse
+    |> Enum.reverse()
     |> Enum.find(&forwarded?(&1, proxies))
   end
 
