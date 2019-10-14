@@ -2,7 +2,7 @@
 
 A [plug](https://github.com/elixir-lang/plug) to overwrite the [`Conn`'s](https://hexdocs.pm/plug/Plug.Conn.html) `remote_ip` based on headers such as `X-Forwarded-For`.
 
-IPs are processed last-to-first to prevent IP spoofing, as thoroughly explained in [a blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) by [@gingerlime](https://github.com/gingerlime). Loopback/private IPs are always ignored and known proxies are configurable, so neither type will be erroneously treated as the original client IP. You can configure any number of arbitrary forwarding headers to use. If there's a special way to parse your particular header, the architecture of this project should [make it easy](#contributing) to open a pull request so `RemoteIp` can accommodate.
+IPs are processed last-to-first to prevent IP spoofing, as thoroughly explained in [a blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) by [@gingerlime](https://github.com/gingerlime). Loopback/private IPs are ignored by default, but known proxies & clients are configurable, so you have full control over which IPs are considered legitimate. You can configure any number of arbitrary forwarding headers to use. If there's a special way to parse your particular header, the architecture of this project should [make it easy](#contributing) to open a pull request so `RemoteIp` can accommodate.
 
 **If your app is not behind at least one proxy, you should not use this plug.** See [below](#algorithm) for more detailed reasoning.
 
@@ -30,23 +30,46 @@ end
 
 Keep in mind the order of plugs in your pipeline and place `RemoteIp` as early as possible. For example, if you were to add `RemoteIp` *after* [the Plug Router](https://github.com/elixir-lang/plug#the-plug-router), your route action's logic would be executed *before* the `remote_ip` actually gets modified - not very useful!
 
-There are 2 options that can be passed in:
+There are 3 options that can be passed in:
 
 * `:headers` - A list of strings naming the `req_headers` to use when deriving the `remote_ip`. Order does not matter. Defaults to `~w[forwarded x-forwarded-for x-client-ip x-real-ip]`.
 
 * `:proxies` - A list of strings in [CIDR](https://en.wikipedia.org/wiki/CIDR) notation specifying the IPs of known proxies. Defaults to `[]`.
 
-For example, if you know you are behind proxies in the IP block 1.2.x.x that use the `X-Foo`, `X-Bar`, and `X-Baz` headers, you could say
+    [Loopback](https://en.wikipedia.org/wiki/Loopback) and [private](https://en.wikipedia.org/wiki/Private_network) IPs are always appended to this list:
+
+    * 127.0.0.0/8
+    * ::1/128
+    * fc00::/7
+    * 10.0.0.0/8
+    * 172.16.0.0/12
+    * 192.168.0.0/16
+
+    Since these IPs are internal, they often are not the actual client address in production, so we add them by default. To override this behavior, whitelist known client IPs using the `:clients` option.
+
+* `:clients` - A list of strings in [CIDR](https://en.wikipedia.org/wiki/CIDR) notation specifying the IPs of known clients. Defaults to `[]`.
+
+    An IP in any of the ranges listed here will never be considered a proxy. This takes precedence over the `:proxies` option, including loopback/private addresses. Any IP that is **not** covered by `:clients` or `:proxies` is assumed to be a client IP.
+
+For example, suppose you know:
+* you are behind proxies in the 1.2.x.x block
+* the proxies use the `X-Foo`, `X-Bar`, and `X-Baz` headers
+* but the IP 1.2.3.4 is actually a client, not one of the proxies
+
+Then you could say
 
 ```elixir
 defmodule MyApp do
   use Plug.Builder
 
-  plug RemoteIp, headers: ~w[x-foo x-bar x-baz], proxies: ~w[1.2.0.0/16]
+  plug RemoteIp,
+       headers: ~w[x-foo x-bar x-baz],
+       proxies: ~w[1.2.0.0/16],
+       clients: ~w[1.2.3.4/32]
 end
 ```
 
-Note that, due to limitations in the [inet_cidr](https://github.com/Cobenian/inet_cidr) library used to parse them, `:proxies` **must** be written in full CIDR notation, even if specifying just a single IP. So instead of `"127.0.0.1"` and `"a:b::c:d"`, you would use `"127.0.0.1/32"` and `"a:b::c:d/128"`.
+Note that, due to limitations in the [inet_cidr](https://github.com/Cobenian/inet_cidr) library used to parse them, `:proxies` and `:clients` **must** be written in full CIDR notation, even if specifying just a single IP. So instead of `"127.0.0.1"` and `"a:b::c:d"`, you would use `"127.0.0.1/32"` and `"a:b::c:d/128"`.
 
 ## Background
 
@@ -80,7 +103,7 @@ Note that the field is _meant_ to be overwritten. Plug does not actually do any 
 None of the available solutions I have seen are ideal. In this sort of plug, you want:
 
 * **Configurable Headers:**  With so many different headers being used, you should be able to configure the ones you need with minimal work.
-* **Configurable Proxies:** With multiple proxy hops, there may be several IPs in the forwarding headers. Without being able to tell the plug which of those IPs are actually known to be proxies, you may get one of them back as the `remote_ip`.
+* **Configurable Proxies and Clients:** With multiple proxy hops, there may be several IPs in the forwarding headers. Without being able to tell the plug which of those IPs are actually known to be proxies, you may get one of them back as the `remote_ip`.
 * **Correctness:** Parsing forwarding headers can be surprisingly subtle. Most available libraries get it wrong.
 
 The table below summarizes the problems with existing packages.
@@ -158,7 +181,9 @@ Not only are known proxies' headers trusted, but also requests forwarded for [lo
 * 172.16.0.0/12
 * 192.168.0.0/16
 
-These IPs are filtered because they are used internally and are thus guaranteed not to be the actual client address in production.
+These IPs are filtered because they are used internally and are thus generally not the actual client address in production.
+
+However, if (say) your app is only deployed in a [VPN](https://en.wikipedia.org/wiki/Virtual_private_network)/[LAN](https://en.wikipedia.org/wiki/Local_area_network), then your clients might actually have these internal IPs. To prevent loopback/private addresses from being considered proxies, configure them as known clients using the [`:clients` option](#usage).
 
 ### :warning: Caveats :warning:
 
@@ -166,24 +191,24 @@ These IPs are filtered because they are used internally and are thus guaranteed 
 
 2. The relative order of IPs can still be messed up by proxies amending prior headers. For instance,
 
-* Request starts from IP 1.1.1.1 (no forwarding headers)
-* Proxy 1 with IP 2.2.2.2 adds `Forwarded: for=1.1.1.1`
-* Proxy 2 with IP 3.3.3.3 adds `X-Forwarded-For: 2.2.2.2`
-* Proxy 3 with IP 4.4.4.4 adds to `Forwarded` so it says `Forwarded: for=1.1.1.1, for=3.3.3.3`
+    * Request starts from IP 1.1.1.1 (no forwarding headers)
+    * Proxy 1 with IP 2.2.2.2 adds `Forwarded: for=1.1.1.1`
+    * Proxy 2 with IP 3.3.3.3 adds `X-Forwarded-For: 2.2.2.2`
+    * Proxy 3 with IP 4.4.4.4 adds to `Forwarded` so it says `Forwarded: for=1.1.1.1, for=3.3.3.3`
 
-Thus, `RemoteIp` processes the request from 4.4.4.4 with the first-to-last list of forwarded IPs
+    Thus, `RemoteIp` processes the request from 4.4.4.4 with the first-to-last list of forwarded IPs
 
-```elixir
-[{1, 1, 1, 1}, {3, 3, 3, 3}, {2, 2, 2, 2}] # what we get
-```
+    ```elixir
+    [{1, 1, 1, 1}, {3, 3, 3, 3}, {2, 2, 2, 2}] # what we get
+    ```
 
-even though the _actual_ order was
+    even though the _actual_ order was
 
-```elixir
-[{1, 1, 1, 1}, {2, 2, 2, 2}, {3, 3, 3, 3}] # actual forwarding order
-```
+    ```elixir
+    [{1, 1, 1, 1}, {2, 2, 2, 2}, {3, 3, 3, 3}] # actual forwarding order
+    ```
 
-The solution to this problem is to add both 2.2.2.2 and 3.3.3.3 as known proxies. Then either way the original client address will be reported as 1.1.1.1. As always, be sure to test in your particular environment.
+    The solution to this problem is to add both 2.2.2.2 and 3.3.3.3 as known proxies. Then either way the original client address will be reported as 1.1.1.1. As always, be sure to test in your particular environment.
 
 ## Contributing
 
