@@ -1,9 +1,13 @@
 defmodule RemoteIpTest do
   use ExUnit.Case, async: true
   use Plug.Test
+  doctest RemoteIp
 
-  def remote_ip(conn, opts \\ []) do
-    RemoteIp.call(conn, RemoteIp.init(opts)).remote_ip
+  def remote_ip(%Plug.Conn{req_headers: head} = conn, opts \\ []) do
+    call = RemoteIp.call(conn, RemoteIp.init(opts)).remote_ip
+    from = RemoteIp.from(head, opts)
+    assert call == from
+    call
   end
 
   test "no forwarding headers" do

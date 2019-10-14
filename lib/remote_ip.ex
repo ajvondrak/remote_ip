@@ -119,20 +119,64 @@ defmodule RemoteIp do
   end
 
   def call(conn, {headers, proxies, clients}) do
-    case last_forwarded_ip(conn, headers, proxies, clients) do
+    case last_forwarded_ip(conn.req_headers, headers, proxies, clients) do
       nil -> conn
       ip  -> %{conn | remote_ip: ip}
     end
   end
 
-  defp last_forwarded_ip(conn, headers, proxies, clients) do
-    conn
+  @doc """
+  Standalone function to extract the remote IP from a list of headers.
+
+  It's possible to get a subset of headers without access to a full `Plug.Conn`
+  struct. For instance, when [using Phoenix
+  sockets](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html), your socket's
+  `connect/3` callback may only be receiving `:x_headers` in the
+  `connect_info`. Such situations make it inconvenient to use `RemoteIp`
+  outside of a plug pipeline.
+
+  Therefore, this function will fetch the remote IP from a plain list of header
+  key-value pairs (just as you'd have in the `req_headers` of a `Plug.Conn`).
+  You may optionally specify the same options as if you were using `RemoteIp`
+  as a plug: they'll be processed by `RemoteIp.init/1` each time you call this
+  function.
+
+  If a remote IP cannot be parsed from the given headers (e.g., if the list is
+  empty), this function will return `nil`.
+
+  ## Examples
+
+      iex> RemoteIp.from([{"x-forwarded-for", "1.2.3.4"}])
+      {1, 2, 3, 4}
+
+      iex> [{"x-foo", "1.2.3.4"}, {"x-bar", "2.3.4.5"}]
+      ...> |> RemoteIp.from(headers: ~w[x-foo])
+      {1, 2, 3, 4}
+
+      iex> [{"x-foo", "1.2.3.4"}, {"x-bar", "2.3.4.5"}]
+      ...> |> RemoteIp.from(headers: ~w[x-bar])
+      {2, 3, 4, 5}
+
+      iex> [{"x-foo", "1.2.3.4"}, {"x-bar", "2.3.4.5"}]
+      ...> |> RemoteIp.from(headers: ~w[x-baz])
+      nil
+  """
+
+  @spec from([{String.t, String.t}], keyword) :: :inet.ip_address | nil
+
+  def from(req_headers, opts \\ []) do
+    {headers, proxies, clients} = init(opts)
+    last_forwarded_ip(req_headers, headers, proxies, clients)
+  end
+
+  defp last_forwarded_ip(req_headers, headers, proxies, clients) do
+    req_headers
     |> ips_from(headers)
     |> last_ip_forwarded_through(proxies, clients)
   end
 
-  defp ips_from(%Plug.Conn{req_headers: headers}, allowed) do
-    RemoteIp.Headers.parse(headers, allowed)
+  defp ips_from(req_headers, headers) do
+    RemoteIp.Headers.parse(req_headers, headers)
   end
 
   defp last_ip_forwarded_through(ips, proxies, clients) do

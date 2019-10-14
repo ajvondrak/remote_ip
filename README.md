@@ -30,7 +30,16 @@ end
 
 Keep in mind the order of plugs in your pipeline and place `RemoteIp` as early as possible. For example, if you were to add `RemoteIp` *after* [the Plug Router](https://github.com/elixir-lang/plug#the-plug-router), your route action's logic would be executed *before* the `remote_ip` actually gets modified - not very useful!
 
-There are 3 options that can be passed in:
+You can also use `RemoteIp.from/2` outside of a plug pipeline to extract the remote IP from a list of headers. This is useful if you don't have access to a full `Plug.Conn` struct, such as when [you're only receiving `x_headers` using Phoenix sockets](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html#socket/3-shared-configuration):
+
+```elixir
+x_headers = [{"x-forwarded-for", "1.2.3.4"}]
+RemoteIp.from(x_headers)
+```
+
+## Configuration
+
+There are 3 options that can be passed in to `RemoteIp.init/1` or `RemoteIp.from/2`:
 
 * `:headers` - A list of strings naming the `req_headers` to use when deriving the `remote_ip`. Order does not matter. Defaults to `~w[forwarded x-forwarded-for x-client-ip x-real-ip]`.
 
@@ -67,6 +76,17 @@ defmodule MyApp do
        proxies: ~w[1.2.0.0/16],
        clients: ~w[1.2.3.4/32]
 end
+```
+
+or
+
+```elixir
+RemoteIp.from(
+  x_headers,
+  headers: ~w[x-foo x-bar x-baz],
+  proxies: ~w[1.2.0.0/16],
+  clients: ~w[1.2.3.4/32]
+)
 ```
 
 Note that, due to limitations in the [inet_cidr](https://github.com/Cobenian/inet_cidr) library used to parse them, `:proxies` and `:clients` **must** be written in full CIDR notation, even if specifying just a single IP. So instead of `"127.0.0.1"` and `"a:b::c:d"`, you would use `"127.0.0.1/32"` and `"a:b::c:d/128"`.
@@ -126,7 +146,7 @@ There are 2 main tasks this plug has to do:
 
 ### Parsing Headers
 
-When `RemoteIp` parses the `Conn`'s `req_headers`, it first selects only the headers specified in the [`:headers` option](#usage). Their relative ordering is maintained, because order matters when there are multiple hops between proxies. Consider this request:
+When `RemoteIp` parses the `Conn`'s `req_headers`, it first selects only the headers specified in the [`:headers` option](#configuration). Their relative ordering is maintained, because order matters when there are multiple hops between proxies. Consider this request:
 
 * Client at IP 1.2.3.4 sends an HTTP request to Proxy 1 (no forwarding headers)
 * Proxy 1 at IP 1.1.1.1 adds a `Forwarded: for=1.2.3.4` header and forwards to Proxy 2
@@ -160,7 +180,7 @@ With the list of IPs parsed, `RemoteIp` must then calculate the proper `remote_i
 To [prevent IP spoofing](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/), IPs are processed right-to-left. You can think of it as working backwards through the chain of hops:
 
 1. The `2.2.2.2 -> 3.3.3.3` hop set `X-Forwarded-For: 1.1.1.1`. Do we trust this header? **Yes**, because `RemoteIp` assumes that there is _at least_ one proxy sitting between your app & the client that sets a forwarding header, meaning that 2.2.2.2 is tacitly a "known" proxy.
-2. The `1.1.1.1 -> 2.2.2.2` hop set `Forwarded: for=1.2.3.4`. Do we trust this header? **It depends**, because we would need to configure `RemoteIp` with the [`:proxies` option](#usage) to know that 1.1.1.1 is a proxy. If we didn't, we wouldn't trust the header, and thus should stop here and say the original client was at 1.1.1.1. Otherwise, we should keep working backwards through the hops. Assuming we do...
+2. The `1.1.1.1 -> 2.2.2.2` hop set `Forwarded: for=1.2.3.4`. Do we trust this header? **It depends**, because we would need to configure `RemoteIp` with the [`:proxies` option](#configuration) to know that 1.1.1.1 is a proxy. If we didn't, we wouldn't trust the header, and thus should stop here and say the original client was at 1.1.1.1. Otherwise, we should keep working backwards through the hops. Assuming we do...
 3. The `1.2.3.4 -> 1.1.1.1` hop set no headers, so we've arrived at the original client address, 1.2.3.4.
 
 Now suppose a client was trying to spoof the IP by setting their own `X-Forwarded-For` header:
@@ -183,7 +203,7 @@ Not only are known proxies' headers trusted, but also requests forwarded for [lo
 
 These IPs are filtered because they are used internally and are thus generally not the actual client address in production.
 
-However, if (say) your app is only deployed in a [VPN](https://en.wikipedia.org/wiki/Virtual_private_network)/[LAN](https://en.wikipedia.org/wiki/Local_area_network), then your clients might actually have these internal IPs. To prevent loopback/private addresses from being considered proxies, configure them as known clients using the [`:clients` option](#usage).
+However, if (say) your app is only deployed in a [VPN](https://en.wikipedia.org/wiki/Virtual_private_network)/[LAN](https://en.wikipedia.org/wiki/Local_area_network), then your clients might actually have these internal IPs. To prevent loopback/private addresses from being considered proxies, configure them as known clients using the [`:clients` option](#configuration).
 
 ### :warning: Caveats :warning:
 
