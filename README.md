@@ -228,28 +228,11 @@ However, if (say) your app is only deployed in a [VPN](https://en.wikipedia.org/
     [{1, 1, 1, 1}, {2, 2, 2, 2}, {3, 3, 3, 3}] # actual forwarding order
     ```
 
-    The solution to this problem is to add both 2.2.2.2 and 3.3.3.3 as known proxies. Then either way the original client address will be reported as 1.1.1.1. As always, be sure to test in your particular environment.
+    A potential solution to this problem is to add both 2.2.2.2 and 3.3.3.3 as known proxies. Then either way the original client address will be reported as 1.1.1.1. As always, be sure to test in your particular environment.
 
 ## Contributing
 
-If there's some header that `RemoteIp` does not parse properly, support is easy to add:
-
-1. Fork this project.
-2. Add a module under `RemoteIp.Headers.YourNewHeader`.
-3. In this new module, export the function `parse/1` that takes in the string value of a single header and returns a list of 0 or more IP addresses parsed from that value. You should use [`:inet.parse_strict_address/1`](http://erlang.org/doc/man/inet.html#parse_strict_address-1) or related functions to do the "dirty work" of parsing the actual IP values. The `parse/1` function is just to find the IPs buried within the string.
-4. Add tests for your new `RemoteIp.Headers.YourNewHeader.parse/1` function.
-5. Add a clause to the private function `RemoteIp.Headers.parse_ips/1` that calls `RemoteIp.Headers.YourNewHeader.parse`.
-6. Open a pull request!
-
-For an example of just such an extension, check out:
-
-* [`RemoteIp.Headers.Forwarded`](https://github.com/ajvondrak/remote_ip/blob/master/lib/remote_ip/headers/forwarded.ex)
-* [`RemoteIp.Headers.ForwardedTest`](https://github.com/ajvondrak/remote_ip/blob/master/test/remote_ip/headers/forwarded_test.exs)
-* [The corresponding `RemoteIp.Headers.parse_ips/1` clause](https://github.com/ajvondrak/remote_ip/blob/ab2d6fe17ea7361dd998e3d0664142f2b4c8b2ea/lib/remote_ip/headers.ex#L16-L18)
-
-If there's demand, I'm open to `RemoteIp` supporting user-configurable parsers. For now, I think the pull request workflow should be sufficient.
-
-If there's some other bug or enhancement not related to parsing a new header, open an issue or pull request and let me know!
+See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to open issues or pull requests.
 
 ## Prior Art
 
