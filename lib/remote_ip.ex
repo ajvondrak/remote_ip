@@ -81,6 +81,8 @@ defmodule RemoteIp do
   GitHub.
   """
 
+  require Logger
+
   @behaviour Plug
 
   @headers ~w[
@@ -169,9 +171,10 @@ defmodule RemoteIp do
   end
 
   defp last_forwarded_ip(req_headers, config) do
-    req_headers
-    |> ips_given(config)
-    |> most_recent_client_given(config)
+    Logger.debug(fn -> start(config) end)
+    ip = req_headers |> ips_given(config) |> most_recent_client_given(config)
+    Logger.debug(fn -> stop(ip) end)
+    ip
   end
 
   defp ips_given(req_headers, %RemoteIp.Config{headers: headers}) do
@@ -183,10 +186,46 @@ defmodule RemoteIp do
   end
 
   defp client?(ip, %RemoteIp.Config{clients: clients, proxies: proxies}) do
-    contains?(clients, ip) || !contains?(proxies, ip)
+    cond do
+      clients |> contains?(ip) ->
+        Logger.debug(fn -> known_client(ip) end)
+        true
+
+      proxies |> contains?(ip) ->
+        Logger.debug(fn -> known_proxy(ip) end)
+        false
+
+      true ->
+        Logger.debug(fn -> presumably_client(ip) end)
+        true
+    end
   end
 
   defp contains?(cidrs, ip) do
     Enum.any?(cidrs, &InetCidr.contains?(&1, ip))
+  end
+
+  defp start(config) do
+    [inspect(__MODULE__), " is configured with ", inspect(config, pretty: true)]
+  end
+
+  defp stop(ip) do
+    if ip do
+      [inspect(__MODULE__), " determined the remote IP is ", inspect(ip)]
+    else
+      [inspect(__MODULE__), " could not determine the remote IP"]
+    end
+  end
+
+  defp known_client(ip) do
+    [inspect(__MODULE__), " thinks ", inspect(ip), " is a known client IP"]
+  end
+
+  defp known_proxy(ip) do
+    [inspect(__MODULE__), " thinks ", inspect(ip), " is a known proxy IP"]
+  end
+
+  defp presumably_client(ip) do
+    [inspect(__MODULE__), " assumes ", inspect(ip), " is a client IP"]
   end
 end
