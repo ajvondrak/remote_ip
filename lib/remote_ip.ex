@@ -115,11 +115,11 @@ defmodule RemoteIp do
     clients = Keyword.get(opts, :clients, @clients)
     clients = clients |> Enum.map(&InetCidr.parse/1)
 
-    {headers, proxies, clients}
+    %RemoteIp.Config{headers: headers, proxies: proxies, clients: clients}
   end
 
-  def call(conn, {headers, proxies, clients}) do
-    case last_forwarded_ip(conn.req_headers, headers, proxies, clients) do
+  def call(conn, %RemoteIp.Config{} = config) do
+    case last_forwarded_ip(conn.req_headers, config) do
       nil -> conn
       ip  -> %{conn | remote_ip: ip}
     end
@@ -165,35 +165,28 @@ defmodule RemoteIp do
   @spec from([{String.t, String.t}], keyword) :: :inet.ip_address | nil
 
   def from(req_headers, opts \\ []) do
-    {headers, proxies, clients} = init(opts)
-    last_forwarded_ip(req_headers, headers, proxies, clients)
+    last_forwarded_ip(req_headers, init(opts))
   end
 
-  defp last_forwarded_ip(req_headers, headers, proxies, clients) do
+  defp last_forwarded_ip(req_headers, config) do
     req_headers
-    |> ips_from(headers)
-    |> last_ip_forwarded_through(proxies, clients)
+    |> ips_given(config)
+    |> most_recent_client_given(config)
   end
 
-  defp ips_from(req_headers, headers) do
+  defp ips_given(req_headers, %RemoteIp.Config{headers: headers}) do
     RemoteIp.Headers.parse(req_headers, headers)
   end
 
-  defp last_ip_forwarded_through(ips, proxies, clients) do
-    ips
-    |> Enum.reverse
-    |> Enum.find(&forwarded?(&1, proxies, clients))
+  defp most_recent_client_given(ips, config) do
+    Enum.reverse(ips) |> Enum.find(&client?(&1, config))
   end
 
-  defp forwarded?(ip, proxies, clients) do
-    client?(ip, clients) || !proxy?(ip, proxies)
+  defp client?(ip, %RemoteIp.Config{clients: clients, proxies: proxies}) do
+    contains?(clients, ip) || !contains?(proxies, ip)
   end
 
-  defp client?(ip, clients) do
-    Enum.any?(clients, fn client -> InetCidr.contains?(client, ip) end)
-  end
-
-  defp proxy?(ip, proxies) do
-    Enum.any?(proxies, fn proxy -> InetCidr.contains?(proxy, ip) end)
+  defp contains?(cidrs, ip) do
+    Enum.any?(cidrs, &InetCidr.contains?(&1, ip))
   end
 end
