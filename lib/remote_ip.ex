@@ -171,9 +171,9 @@ defmodule RemoteIp do
   end
 
   defp last_forwarded_ip(req_headers, config) do
-    Logger.debug(fn -> start(config) end)
+    maybe_log_debug(fn -> start(config) end)
     ip = req_headers |> ips_given(config) |> most_recent_client_given(config)
-    Logger.debug(fn -> stop(ip) end)
+    maybe_log_debug(fn -> stop(ip) end)
     ip
   end
 
@@ -188,15 +188,15 @@ defmodule RemoteIp do
   defp client?(ip, %RemoteIp.Config{clients: clients, proxies: proxies}) do
     cond do
       clients |> contains?(ip) ->
-        Logger.debug(fn -> known_client(ip) end)
+        maybe_log_debug(fn -> known_client(ip) end)
         true
 
       proxies |> contains?(ip) ->
-        Logger.debug(fn -> known_proxy(ip) end)
+        maybe_log_debug(fn -> known_proxy(ip) end)
         false
 
       true ->
-        Logger.debug(fn -> presumably_client(ip) end)
+        maybe_log_debug(fn -> presumably_client(ip) end)
         true
     end
   end
@@ -227,5 +227,9 @@ defmodule RemoteIp do
 
   defp presumably_client(ip) do
     [inspect(__MODULE__), " assumes ", inspect(ip), " is a client IP"]
+  end
+
+  defp maybe_log_debug(any) do
+    if Application.get_env(:remote_ip, :debug), do: Logger.debug(any)
   end
 end
