@@ -37,6 +37,24 @@ x_headers = [{"x-forwarded-for", "1.2.3.4"}]
 RemoteIp.from(x_headers)
 ```
 
+## Logging
+
+`RemoteIp` includes debug-level logging that traces the [algorithm](#algorithm) as IPs are extracted from headers. This can be useful for tracking down issues with your particular proxy environment.
+
+If these logs are too noisy, you should disable them using `Logger`'s [`:compile_time_purge_matching` option](https://hexdocs.pm/logger/Logger.html#module-application-configuration) with the appropriate [metadata](https://hexdocs.pm/logger/Logger.html#module-metadata):
+
+```elixir
+config :logger, compile_time_purge_matching: [[application: :remote_ip]]
+```
+
+Make sure to recompile this library after reconfiguring `Logger` so that the `Logger.debug/2` macros get purged:
+
+```console
+$ mix deps.compile --force remote_ip
+```
+
+Note that this option is only available in [Elixir v1.7](https://elixir-lang.org/blog/2018/07/25/elixir-v1-7-0-released/) and up.
+
 ## Configuration
 
 There are 3 options that can be passed in to `RemoteIp.init/1` or `RemoteIp.from/2`:
