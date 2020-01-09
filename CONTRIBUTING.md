@@ -177,7 +177,7 @@ A few notes about getting your pull request accepted:
   * **Don't** make unnecessary or unrelated changes.
 * Keep your history clean.
   * **Do** make sure each commit pertains conceptually to a single change.
-  * **Dont'** leave your commits disorganized with various works-in-progress. [Rewrite](https://git-scm.com/book/id/v2/Git-Tools-Rewriting-History) [history](https://git-rebase.io/) [if](https://programmerfriend.com/git-best-practices/) [necessary](http://justinhileman.info/article/changing-history/).
+  * **Don't** leave your commits disorganized with various works-in-progress. [Rewrite](https://git-scm.com/book/id/v2/Git-Tools-Rewriting-History) [history](https://git-rebase.io/) [if](https://programmerfriend.com/git-best-practices/) [necessary](http://justinhileman.info/article/changing-history/).
 * Write a good PR description.
   * What problem are you trying to solve?
   * Who does the problem affect?
