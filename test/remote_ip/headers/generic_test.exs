@@ -10,6 +10,7 @@ defmodule RemoteIp.Headers.GenericTest do
       assert [] == Generic.parse("      ")
       assert [] == Generic.parse("not_an_ip")
       assert [] == Generic.parse("unknown")
+      assert [] == Generic.parse(<<240, 253, 253, 253>>)
     end
 
     test "bad IPv4" do
