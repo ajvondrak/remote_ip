@@ -79,6 +79,27 @@ defmodule RemoteIp do
   For more details, refer to the
   [README](https://github.com/ajvondrak/remote_ip/blob/master/README.md) on
   GitHub.
+
+  Tuple `{mod, func, args}` can also be passed to `:proxies` and `:clients`
+  to enable getting values from environment variables in Elixir releases
+  or to use custom logic.
+
+  For example, you can have:
+
+  ```elixir
+  defmodule MyApp do
+    use Plug.Builder
+
+    plug RemoteIp,
+         proxies: {__MODULE__, :proxy?, []}
+
+    def proxy?(ip) do
+      System.get_env("PROXY_CIDR")
+      |> InetCidr.parse()
+      |> InetCidr.contains?(ip)
+    end
+  end
+  ```
   """
 
   require Logger
@@ -111,11 +132,13 @@ defmodule RemoteIp do
     headers = Keyword.get(opts, :headers, @headers)
     headers = MapSet.new(headers)
 
-    proxies = Keyword.get(opts, :proxies, @proxies) ++ @reserved
-    proxies = proxies |> Enum.map(&InetCidr.parse/1)
+    proxies =
+      Keyword.get(opts, :proxies, @proxies)
+      |> parse_proxies()
 
-    clients = Keyword.get(opts, :clients, @clients)
-    clients = clients |> Enum.map(&InetCidr.parse/1)
+    clients =
+      Keyword.get(opts, :clients, @clients)
+      |> parse_clients()
 
     %RemoteIp.Config{headers: headers, proxies: proxies, clients: clients}
   end
@@ -201,9 +224,8 @@ defmodule RemoteIp do
     end
   end
 
-  defp contains?(cidrs, ip) do
-    Enum.any?(cidrs, &InetCidr.contains?(&1, ip))
-  end
+  defp contains?(cidrs, ip) when is_list(cidrs), do: Enum.any?(cidrs, &InetCidr.contains?(&1, ip))
+  defp contains?({mod, fun, args}, ip), do: apply(mod, fun, [ip | args])
 
   defp start(config) do
     [inspect(__MODULE__), " is configured with ", inspect(config, pretty: true)]
@@ -228,4 +250,16 @@ defmodule RemoteIp do
   defp presumably_client(ip) do
     [inspect(__MODULE__), " assumes ", inspect(ip), " is a client IP"]
   end
+
+  defp parse_proxies(proxies) when is_list(proxies) do
+    proxies
+    |> Enum.concat(@reserved)
+    |> Enum.map(&InetCidr.parse/1)
+  end
+  defp parse_proxies({_, _, _} = callback), do: callback
+
+  defp parse_clients(clients) when is_list(clients) do
+    Enum.map(clients, &InetCidr.parse/1)
+  end
+  defp parse_clients({_, _, _} = callback), do: callback
 end

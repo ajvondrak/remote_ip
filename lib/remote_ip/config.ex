@@ -14,15 +14,17 @@ defmodule RemoteIp.Config do
   * `headers` - Forwarding headers converted to a `MapSet` for efficient
     membership checks.
 
-  * `proxies` - Known proxy IP ranges parsed by `InetCidr.parse/1`.
+  * `proxies` - Known proxy IP ranges parsed by `InetCidr.parse/1`
+    or tuple `{module, function, args}`.
 
-  * `clients` - Known client IP ranges parsed by `InetCidr.parse/1`.
+  * `clients` - Known client IP ranges parsed by `InetCidr.parse/1`
+    or tuple `{module, function, args}`.
   """
 
   @type cidr :: {:inet.ip_address, :inet.ip_address, integer}
   @type headers :: MapSet.t(String.t)
-  @type proxies :: [cidr]
-  @type clients :: [cidr]
+  @type proxies :: [cidr] | {module, atom, List.t}
+  @type clients :: [cidr] | {module, atom, List.t}
   @type t :: %__MODULE__{headers: headers, proxies: proxies, clients: clients}
 
   defstruct [:headers, :proxies, :clients]
