@@ -328,6 +328,7 @@ defmodule RemoteIpTest do
         {"x-real-ip", "2001:0db8:85a3:0000:0000:8A2E:0370:7334"},
         {"x-real-ip", "127.0.0.2"}
       ]
+
       conn = %Plug.Conn{req_headers: head}
       opts = [proxies: ~w[2001:0db8:85a3::8A2E:0370:7334/128]]
       assert nil == remote_ip(conn, opts)
@@ -397,6 +398,7 @@ defmodule RemoteIpTest do
         {"x-client-ip", "::1, ::1"},
         {"x-real-ip", "2.3.4.5, fc00::1, 2.4.6.8"}
       ]
+
       conn = %Plug.Conn{req_headers: head}
       opts = [proxies: ~w[2.0.0.0/8]]
       assert {1, 2, 3, 4} == remote_ip(conn, opts)
@@ -411,6 +413,7 @@ defmodule RemoteIpTest do
         {"x-client-ip", "1.2.3.4"},
         {"x-real-ip", "1.2.3.4"}
       ]
+
       conn = %Plug.Conn{req_headers: head}
       opts = [headers: ~w[custom]]
       fail = "default headers are still being parsed"

@@ -123,7 +123,7 @@ defmodule RemoteIp do
   def call(conn, %RemoteIp.Config{} = config) do
     case last_forwarded_ip(conn.req_headers, config) do
       nil -> conn
-      ip  -> %{conn | remote_ip: ip}
+      ip -> %{conn | remote_ip: ip}
     end
   end
 
@@ -164,7 +164,7 @@ defmodule RemoteIp do
       nil
   """
 
-  @spec from([{String.t, String.t}], keyword) :: :inet.ip_address | nil
+  @spec from([{String.t(), String.t()}], keyword) :: :inet.ip_address() | nil
 
   def from(req_headers, opts \\ []) do
     last_forwarded_ip(req_headers, init(opts))
