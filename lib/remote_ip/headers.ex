@@ -21,12 +21,12 @@ defmodule RemoteIp.Headers do
   @type key :: String.t
   @type value :: String.t
   @type header :: {key, value}
-  @type allowed :: %MapSet{}
+  @type allowed :: MapSet.t(String.t)
   @type ip :: :inet.ip_address
 
   @spec parse([header], allowed) :: [ip]
 
-  def parse(headers, %MapSet{} = allowed) when is_list(headers) do
+  def parse(headers, allowed) when is_list(headers) do
     Logger.debug(fn -> parsing(headers) end)
     ips = headers |> allow(allowed) |> parse_each
     Logger.debug(fn -> parsed(ips) end)
@@ -39,7 +39,7 @@ defmodule RemoteIp.Headers do
     filtered
   end
 
-  defp allow?({header, _}, allowed) do
+  defp allow?({header, _}, allowed) when is_binary(header) do
     MapSet.member?(allowed, header)
   end
 
