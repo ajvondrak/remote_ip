@@ -2,13 +2,18 @@ defmodule RemoteIp.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :remote_ip,
-     version: "0.2.1",
-     elixir: "~> 1.5",
-     package: package(),
-     description: description(),
-     deps: deps(),
-     docs: [source_url: "https://github.com/ajvondrak/remote_ip"]]
+    [
+      app: :remote_ip,
+      version: "0.2.2",
+      elixir: "~> 1.7",
+      package: package(),
+      description: description(),
+      deps: deps(),
+      docs: [source_url: "https://github.com/ajvondrak/remote_ip"],
+      dialyzer: [
+        plt_core_path: "_build/#{Mix.env()}"
+      ]
+    ]
   end
 
   def application do
@@ -17,20 +22,25 @@ defmodule RemoteIp.Mixfile do
 
   defp description do
     "A plug to overwrite the Conn's remote_ip based on headers such as " <>
-    "X-Forwarded-For."
+      "X-Forwarded-For."
   end
 
   defp package do
-    %{files: ~w[lib mix.exs README.md LICENSE],
+    %{
+      files: ~w[lib mix.exs README.md LICENSE],
       maintainers: ["Alex Vondrak"],
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/ajvondrak/remote_ip"}}
+      links: %{"GitHub" => "https://github.com/ajvondrak/remote_ip"}
+    }
   end
 
   defp deps do
-    [{:combine, "~> 0.10"},
-     {:plug, "~> 1.5"},
-     {:inet_cidr, "~> 1.0"},
-     {:ex_doc, "~> 0.21", only: :dev}]
+    [
+      {:combine, "~> 0.10"},
+      {:plug, "~> 1.11"},
+      {:inet_cidr, "~> 1.0"},
+      {:ex_doc, "~> 0.23", only: :dev},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+    ]
   end
 end

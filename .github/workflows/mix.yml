@@ -1,0 +1,30 @@
+name: mix
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Elixir ${{matrix.elixir}} (Erlang/OTP ${{matrix.otp}})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        otp: ['22.3.4']
+        elixir: ['1.11.2', '1.10.4', '1.9.4', '1.8.2', '1.7.4'] 
+        include:
+          - elixir: '1.11.2'
+            otp: '23.1.4'
+          
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-elixir@v1
+        with:
+          otp-version: ${{matrix.otp}}
+          elixir-version: ${{matrix.elixir}}
+      - uses: actions/cache@v1
+        with:
+          path: _build
+          key: dependencies-${{ hashFiles('mix.lock') }}-${{matrix.otp}}-${{matrix.elixir}}
+      - run: mix deps.get
+      - run: mix compile --warnings-as-errors
+      - run: mix dialyzer
+      - run: mix test
