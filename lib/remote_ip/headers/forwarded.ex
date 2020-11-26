@@ -22,21 +22,22 @@ defmodule RemoteIp.Headers.Forwarded do
       []
   """
 
-  @type header :: String.t
-  @type ip :: :inet.ip_address
+  @type header :: String.t()
+  @type ip :: :inet.ip_address()
   @spec parse(header) :: [ip]
 
   def parse(header) when is_binary(header) do
     case Combine.parse(header, forwarded()) do
       [elements] -> Enum.flat_map(elements, &parse_forwarded_for/1)
-      _          -> []
+      _ -> []
     end
   end
 
   defp parse_forwarded_for(pairs) do
     case pairs |> fors do
       [string] -> parse_ip(string)
-      _        -> [] # no `for=`s or multiple `for=`s
+      # no `for=`s or multiple `for=`s
+      _ -> []
     end
   end
 
@@ -47,7 +48,7 @@ defmodule RemoteIp.Headers.Forwarded do
   defp parse_ip(string) do
     case Combine.parse(string, ip_address()) do
       [ip] -> [ip]
-      _    -> []
+      _ -> []
     end
   end
 
@@ -92,10 +93,10 @@ defmodule RemoteIp.Headers.Forwarded do
     word_of(~r/[\t \x21\x23-\x5B\x5D-\x7E\x80-\xFF]/)
   end
 
-  @quotable [?\t]
-         ++ Enum.to_list(0x21..0x7E)
-         ++ Enum.to_list(0x80..0xFF)
-         |> Enum.map(&<<&1::utf8>>)
+  @quotable ([?\t] ++
+               Enum.to_list(0x21..0x7E) ++
+               Enum.to_list(0x80..0xFF))
+            |> Enum.map(&<<&1::utf8>>)
 
   defp quoted_pair do
     ignore(char("\\")) |> one_of(char(), @quotable)
@@ -118,12 +119,12 @@ defmodule RemoteIp.Headers.Forwarded do
   end
 
   defp node_name do
-    choice [
+    choice([
       ipv4_address(),
       between(char("["), ipv6_address(), char("]")),
       ignore(string("unknown")),
-      ignore(obfuscated()),
-    ]
+      ignore(obfuscated())
+    ])
   end
 
   defp node_port(previous) do
@@ -149,7 +150,7 @@ defmodule RemoteIp.Headers.Forwarded do
   defp ipv4_address do
     map(word_of(~r/[0-9.]/), fn string ->
       case :inet.parse_ipv4strict_address(string |> to_charlist) do
-        {:ok, ip}         -> ip
+        {:ok, ip} -> ip
         {:error, :einval} -> {:error, "Invalid IPv4 address"}
       end
     end)
@@ -158,7 +159,7 @@ defmodule RemoteIp.Headers.Forwarded do
   defp ipv6_address do
     map(word_of(~r/[0-9a-f:.]/i), fn string ->
       case :inet.parse_ipv6strict_address(string |> to_charlist) do
-        {:ok, ip}         -> ip
+        {:ok, ip} -> ip
         {:error, :einval} -> {:error, "Invalid IPv6 address"}
       end
     end)

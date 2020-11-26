@@ -19,8 +19,8 @@ defmodule RemoteIp.Config do
   * `clients` - Known client IP ranges parsed by `InetCidr.parse/1`.
   """
 
-  @type cidr :: {:inet.ip_address, :inet.ip_address, integer}
-  @type headers :: MapSet.t(String.t)
+  @type cidr :: {:inet.ip_address(), :inet.ip_address(), integer}
+  @type headers :: MapSet.t(String.t())
   @type proxies :: [cidr]
   @type clients :: [cidr]
   @type t :: %__MODULE__{headers: headers, proxies: proxies, clients: clients}
