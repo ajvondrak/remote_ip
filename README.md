@@ -30,7 +30,7 @@ end
 
 Keep in mind the order of plugs in your pipeline and place `RemoteIp` as early as possible. For example, if you were to add `RemoteIp` *after* [the Plug Router](https://github.com/elixir-lang/plug#the-plug-router), your route action's logic would be executed *before* the `remote_ip` actually gets modified - not very useful!
 
-You can also use `RemoteIp.from/2` outside of a plug pipeline to extract the remote IP from a list of headers. This is useful if you don't have access to a full `Plug.Conn` struct, such as when [you're only receiving `x_headers` using Phoenix sockets](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html#socket/3-shared-configuration):
+You can also use `RemoteIp.from/2` outside of a plug pipeline to extract the remote IP from a list of headers. This is useful if you don't have access to a full `Plug.Conn` struct, such as when you're only receiving `x_headers` using [Phoenix sockets](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html#socket/3):
 
 ```elixir
 x_headers = [{"x-forwarded-for", "1.2.3.4"}]
