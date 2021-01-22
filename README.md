@@ -55,6 +55,12 @@ $ mix deps.compile --force remote_ip
 
 Note that this option is only available in [Elixir v1.7](https://elixir-lang.org/blog/2018/07/25/elixir-v1-7-0-released/) and up.
 
+The remote IP is also available as [logger metadata](https://hexdocs.pm/logger/master/Logger.html#module-metadata). To see the IP address in your log output, configure your logger backends to include the `:remote_ip` metadata:
+
+```elixir
+config :logger, :console, metadata: [:remote_ip]
+```
+
 ## Configuration
 
 There are 3 options that can be passed in to `RemoteIp.init/1` or `RemoteIp.from/2`:
