@@ -123,8 +123,14 @@ defmodule RemoteIp do
   def call(conn, %RemoteIp.Config{} = config) do
     case last_forwarded_ip(conn.req_headers, config) do
       nil -> conn
-      ip  -> %{conn | remote_ip: ip}
+      ip  ->
+        Logger.metadata(remote_ip: convert_to_string(ip))
+        %{conn | remote_ip: ip}
     end
+  end
+
+  defp convert_to_string(ip) do
+    ip |> :inet_parse.ntoa() |> to_string()
   end
 
   @doc """
