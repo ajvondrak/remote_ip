@@ -53,6 +53,7 @@ defmodule RemoteIpTest do
       head = []
       conn = %Plug.Conn{remote_ip: peer, req_headers: head}
       assert call(conn).remote_ip == peer
+      assert Logger.metadata[:remote_ip] == "86.75.30.9"
     end
 
     for {header, value} <- @unknown do
@@ -62,6 +63,7 @@ defmodule RemoteIpTest do
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == peer
+        assert Logger.metadata[:remote_ip] == "1.2.3.4"
       end
     end
 
@@ -72,6 +74,7 @@ defmodule RemoteIpTest do
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == peer
+        assert Logger.metadata[:remote_ip] == "d:e:a:d:b:e:e:f"
       end
     end
 
@@ -82,6 +85,7 @@ defmodule RemoteIpTest do
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == peer
+        assert Logger.metadata[:remote_ip] == "de:ad::be:ef"
       end
     end
 
@@ -92,6 +96,7 @@ defmodule RemoteIpTest do
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == {2, 71, 82, 8}
+        assert Logger.metadata[:remote_ip] == "2.71.82.8"
       end
     end
 
@@ -102,6 +107,7 @@ defmodule RemoteIpTest do
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == {0, 0, 0, 0, 0, 0, 583, 21000}
+        assert Logger.metadata[:remote_ip] == "::2.71.82.8"
       end
     end
   end
@@ -110,6 +116,7 @@ defmodule RemoteIpTest do
     test "no headers" do
       head = []
       assert RemoteIp.from(head) == nil
+      assert Logger.metadata[:remote_ip] == nil
     end
 
     for {header, value} <- @unknown do
@@ -117,6 +124,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == nil
+        assert Logger.metadata[:remote_ip] == nil
       end
     end
 
@@ -125,6 +133,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == nil
+        assert Logger.metadata[:remote_ip] == nil
       end
     end
 
@@ -133,6 +142,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == nil
+        assert Logger.metadata[:remote_ip] == nil
       end
     end
 
@@ -141,6 +151,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == {2, 71, 82, 8}
+        assert Logger.metadata[:remote_ip] == nil
       end
     end
 
@@ -149,6 +160,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == {0, 0, 0, 0, 0, 0, 583, 21000}
+        assert Logger.metadata[:remote_ip] == nil
       end
     end
   end
