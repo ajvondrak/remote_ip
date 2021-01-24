@@ -98,6 +98,7 @@ defmodule RemoteIp do
 
   # https://en.wikipedia.org/wiki/Loopback
   # https://en.wikipedia.org/wiki/Private_network
+  # https://en.wikipedia.org/wiki/Reserved_IP_addresses
   @reserved ~w[
     127.0.0.0/8
     ::1/128
@@ -105,12 +106,12 @@ defmodule RemoteIp do
     10.0.0.0/8
     172.16.0.0/12
     192.168.0.0/16
-  ]
+  ] |> Enum.map(&InetCidr.parse/1)
 
   def init(opts \\ []) do
     headers = Keyword.get(opts, :headers, @headers)
 
-    proxies = Keyword.get(opts, :proxies, @proxies) ++ @reserved
+    proxies = Keyword.get(opts, :proxies, @proxies)
     proxies = proxies |> Enum.map(&InetCidr.parse/1)
 
     clients = Keyword.get(opts, :clients, @clients)
@@ -204,6 +205,10 @@ defmodule RemoteIp do
         Logger.debug(fn -> known_proxy(ip) end)
         false
 
+      @reserved |> contains?(ip) ->
+        Logger.debug(fn -> reserved(ip) end)
+        false
+
       true ->
         Logger.debug(fn -> presumably_client(ip) end)
         true
@@ -232,6 +237,10 @@ defmodule RemoteIp do
 
   defp known_proxy(ip) do
     [inspect(__MODULE__), " thinks ", inspect(ip), " is a known proxy IP"]
+  end
+
+  defp reserved(ip) do
+    [inspect(__MODULE__), " thinks ", inspect(ip), " is a reserved IP"]
   end
 
   defp presumably_client(ip) do
