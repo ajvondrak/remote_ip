@@ -11,14 +11,14 @@ defmodule RemoteIp.HeadersTest do
     {"z", "0.0.0.0"},
   ]
 
-  @abc_allowed MapSet.new(~w[a b c])
+  @abc_allowed ~w[a b c]
 
   test "parsing an empty list of headers" do
     assert Headers.parse([], @abc_allowed) == []
   end
 
   test "parsing with no allowed headers" do
-    assert Headers.parse(@abc_headers, MapSet.new) == []
+    assert Headers.parse(@abc_headers, []) == []
   end
 
   test "only allowed headers get parsed" do
@@ -33,29 +33,29 @@ defmodule RemoteIp.HeadersTest do
       {"forwarded", ~S'for="[::2:3:4:5]";proto=http;host=example.com'},
       {"forwarded", ~S'proto=http;for=3.4.5.6;by=127.0.0.1'},
       {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], MapSet.new(~w[forwarded]))
+    ], ~w[forwarded])
 
     assert ips == Headers.parse([
       {"forwarded", ~S'for=1.2.3.4, for="[::2:3:4:5]";proto=http;host=example.com'},
       {"forwarded", ~S'proto=http;for=3.4.5.6;by=127.0.0.1'},
       {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], MapSet.new(~w[forwarded]))
+    ], ~w[forwarded])
 
     assert ips == Headers.parse([
       {"forwarded", ~S'for=1.2.3.4, for="[::2:3:4:5]";proto=http;host=example.com, proto=http;for=3.4.5.6;by=127.0.0.1'},
       {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], MapSet.new(~w[forwarded]))
+    ], ~w[forwarded])
 
     assert ips == Headers.parse([
       {"forwarded", ~S'for=1.2.3.4'},
       {"forwarded", ~S'for="[::2:3:4:5]";proto=http;host=example.com'},
       {"forwarded", ~S'proto=http;for=3.4.5.6;by=127.0.0.1, proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], MapSet.new(~w[forwarded]))
+    ], ~w[forwarded])
 
     assert ips == Headers.parse([
       {"forwarded", ~S'for=1.2.3.4'},
       {"forwarded", ~S'for="[::2:3:4:5]";proto=http;host=example.com, proto=http;for=3.4.5.6;by=127.0.0.1, proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], MapSet.new(~w[forwarded]))
+    ], ~w[forwarded])
   end
 
   test "parsing generic headers" do
@@ -76,7 +76,7 @@ defmodule RemoteIp.HeadersTest do
       {7, 7, 7, 7},
     ]
 
-    assert Headers.parse(headers, MapSet.new(~w[generic])) == ips
+    assert Headers.parse(headers, ~w[generic]) == ips
   end
 
   test "parsing an unrecognized header falls back to generic parsing" do
@@ -85,7 +85,7 @@ defmodule RemoteIp.HeadersTest do
       {"x-real-ip", "3.3.3.3, 4.4.4.4"},
       {"x-client-ip", "5.5.5.5"},
     ]
-    allowed = MapSet.new(~w[x-forwarded-for x-real-ip x-client-ip])
+    allowed = ~w[x-forwarded-for x-real-ip x-client-ip]
     ips = [
       {1, 1, 1, 1},
       {2, 2, 2, 2},
@@ -109,7 +109,7 @@ defmodule RemoteIp.HeadersTest do
       {"not-allowed", "10.10.10.10"},
     ]
 
-    allowed = MapSet.new(~w[forwarded x-forwarded-for])
+    allowed = ~w[forwarded x-forwarded-for]
 
     ips = [
       {1, 1, 1, 1},

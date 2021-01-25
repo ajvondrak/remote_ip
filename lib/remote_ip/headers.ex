@@ -9,8 +9,7 @@ defmodule RemoteIp.Headers do
   Selects the appropriate headers and parses IPs out of them.
 
   * `headers` - The entire list of the `Plug.Conn` `req_headers`
-  * `allowed` - The list of headers `RemoteIp` is configured to look for,
-    converted to a `MapSet` for efficiency
+  * `allowed` - The list of headers `RemoteIp` is configured to look for
 
   The actual parsing is delegated to the `RemoteIp.Headers.*` submodules:
 
@@ -21,7 +20,7 @@ defmodule RemoteIp.Headers do
   @type key :: String.t
   @type value :: String.t
   @type header :: {key, value}
-  @type allowed :: MapSet.t(key())
+  @type allowed :: [String.t]
   @type ip :: :inet.ip_address
 
   @spec parse([header], allowed) :: [ip]
@@ -40,7 +39,7 @@ defmodule RemoteIp.Headers do
   end
 
   defp allow?({header, _}, allowed) do
-    MapSet.member?(allowed, header)
+    Enum.member?(allowed, header)
   end
 
   defp parse_each(headers) do
