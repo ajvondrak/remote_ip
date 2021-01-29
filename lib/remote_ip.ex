@@ -81,7 +81,7 @@ defmodule RemoteIp do
   GitHub.
   """
 
-  require Logger
+  use RemoteIp.Debug
 
   @behaviour Plug
 
@@ -181,10 +181,10 @@ defmodule RemoteIp do
   end
 
   defp last_forwarded_ip(req_headers, config) do
-    Logger.debug(fn -> start(config) end)
-    ip = req_headers |> ips_given(config) |> most_recent_client_given(config)
-    Logger.debug(fn -> stop(ip) end)
-    ip
+    RemoteIp.Debug.log("Processing remote IP with config", do: config)
+    RemoteIp.Debug.log("Processing remote IP from headers", do: req_headers)
+
+    req_headers |> ips_given(config) |> most_recent_client_given(config)
   end
 
   defp ips_given(req_headers, %RemoteIp.Config{headers: headers}) do
@@ -192,58 +192,36 @@ defmodule RemoteIp do
   end
 
   defp most_recent_client_given(ips, config) do
-    Enum.reverse(ips) |> Enum.find(&client?(&1, config))
+    RemoteIp.Debug.log("Processed remote IP") do
+      Enum.reverse(ips) |> Enum.find(&client?(&1, config))
+    end
   end
 
-  defp client?(ip, %RemoteIp.Config{clients: clients, proxies: proxies}) do
-    cond do
-      clients |> contains?(ip) ->
-        Logger.debug(fn -> known_client(ip) end)
-        true
+  defp client?(ip, config) do
+    RemoteIp.Debug.log("#{inspect(ip)} is the client IP") do
+      known_client?(ip, config) || (!known_proxy?(ip, config) && !reserved?(ip))
+    end
+  end
 
-      proxies |> contains?(ip) ->
-        Logger.debug(fn -> known_proxy(ip) end)
-        false
+  defp known_client?(ip, %RemoteIp.Config{clients: clients}) do
+    RemoteIp.Debug.log("#{inspect(ip)} is a known client") do
+      clients |> contains?(ip)
+    end
+  end
 
-      @reserved |> contains?(ip) ->
-        Logger.debug(fn -> reserved(ip) end)
-        false
+  defp known_proxy?(ip, %RemoteIp.Config{proxies: proxies}) do
+    RemoteIp.Debug.log("#{inspect(ip)} is a known proxy") do
+      proxies |> contains?(ip)
+    end
+  end
 
-      true ->
-        Logger.debug(fn -> presumably_client(ip) end)
-        true
+  def reserved?(ip) do
+    RemoteIp.Debug.log("#{inspect(ip)} is a reserved IP") do
+      @reserved |> contains?(ip)
     end
   end
 
   defp contains?(cidrs, ip) do
     Enum.any?(cidrs, &InetCidr.contains?(&1, ip))
-  end
-
-  defp start(config) do
-    [inspect(__MODULE__), " is configured with ", inspect(config, pretty: true)]
-  end
-
-  defp stop(ip) do
-    if ip do
-      [inspect(__MODULE__), " determined the remote IP is ", inspect(ip)]
-    else
-      [inspect(__MODULE__), " could not determine the remote IP"]
-    end
-  end
-
-  defp known_client(ip) do
-    [inspect(__MODULE__), " thinks ", inspect(ip), " is a known client IP"]
-  end
-
-  defp known_proxy(ip) do
-    [inspect(__MODULE__), " thinks ", inspect(ip), " is a known proxy IP"]
-  end
-
-  defp reserved(ip) do
-    [inspect(__MODULE__), " thinks ", inspect(ip), " is a reserved IP"]
-  end
-
-  defp presumably_client(ip) do
-    [inspect(__MODULE__), " assumes ", inspect(ip), " is a client IP"]
   end
 end
