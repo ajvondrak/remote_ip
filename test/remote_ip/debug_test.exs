@@ -5,9 +5,7 @@ defmodule RemoteIp.DebugTest do
   use RemoteIp.Debug
 
   def eval(quoted) do
-    ast = Macro.expand_once(quoted, __ENV__)
-    {term, _} = Code.eval_quoted(ast, [], __ENV__)
-    term
+    Code.eval_quoted(quoted, [], __ENV__) |> elem(0)
   end
 
   describe "with debugging disabled" do
