@@ -59,7 +59,7 @@ defmodule RemoteIp.Debug do
     if Application.get_env(:remote_ip, :debug, false) do
       quote do
         value = unquote(block)
-        Logger.debug(fn -> "#{unquote(msg)}: #{inspect(value)}" end)
+        Logger.debug("#{unquote(msg)}: #{inspect(value)}")
         value
       end
     else
