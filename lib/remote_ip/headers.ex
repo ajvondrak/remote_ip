@@ -26,13 +26,12 @@ defmodule RemoteIp.Headers do
   @spec parse([header], allowed) :: [ip]
 
   def parse(headers, allowed) when is_list(headers) do
-    RemoteIp.Debug.log("Parsed forwarding headers into IPs") do
-      headers |> allow(allowed) |> parse_each
-    end
+    RemoteIp.Debug.log(:req, do: headers)
+    headers |> allow(allowed) |> parse_each
   end
 
   defp allow(headers, allowed) do
-    RemoteIp.Debug.log("Parsing IPs from forwarding headers") do
+    RemoteIp.Debug.log(:fwd) do
       Enum.filter(headers, &allow?(&1, allowed))
     end
   end
@@ -42,7 +41,9 @@ defmodule RemoteIp.Headers do
   end
 
   defp parse_each(headers) do
-    Enum.flat_map(headers, &parse_ips/1)
+    RemoteIp.Debug.log(:ips) do
+      Enum.flat_map(headers, &parse_ips/1)
+    end
   end
 
   defp parse_ips({"forwarded", value}) when is_binary(value) do

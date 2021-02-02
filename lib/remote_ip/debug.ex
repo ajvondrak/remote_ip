@@ -87,6 +87,18 @@ defmodule RemoteIp.Debug do
     "Processing remote IPs using known clients: #{inspect(clients)}"
   end
 
+  defp message_for(:req, [], headers) do
+    "Processing remote IP from request headers: #{inspect(headers)}"
+  end
+
+  defp message_for(:fwd, [], headers) do
+    "Parsing IPs from known forwarding headers: #{inspect(headers)}"
+  end
+
+  defp message_for(:ips, [], ips) do
+    "Parsed IPs out of forwarding headers into: #{inspect(ips)}"
+  end
+
   # TODO: remove this clause after fleshing out all the possible message IDs
   defp message_for(id, inputs, output) do
     inspect([id: id, inputs: inputs, output: output], pretty: true)

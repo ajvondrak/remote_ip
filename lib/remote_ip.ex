@@ -185,8 +185,6 @@ defmodule RemoteIp do
     RemoteIp.Debug.log(:proxies, do: config.proxies)
     RemoteIp.Debug.log(:clients, do: config.clients)
 
-    RemoteIp.Debug.log("Processing remote IP from headers", do: req_headers)
-
     req_headers |> ips_given(config) |> most_recent_client_given(config)
   end
 
