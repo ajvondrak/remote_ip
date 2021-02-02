@@ -121,10 +121,12 @@ defmodule RemoteIp do
   end
 
   def call(conn, %RemoteIp.Config{} = config) do
-    with_metadata do
-      case last_forwarded_ip(conn.req_headers, config) do
-        nil -> conn
-        ip  -> %{conn | remote_ip: ip}
+    RemoteIp.Debug.log(:call, [conn]) do
+      with_metadata do
+        case last_forwarded_ip(conn.req_headers, config) do
+          nil -> conn
+          ip  -> %{conn | remote_ip: ip}
+        end
       end
     end
   end
@@ -169,7 +171,9 @@ defmodule RemoteIp do
   @spec from([{String.t, String.t}], keyword) :: :inet.ip_address | nil
 
   def from(req_headers, opts \\ []) do
-    last_forwarded_ip(req_headers, init(opts))
+    RemoteIp.Debug.log(:from) do
+      last_forwarded_ip(req_headers, init(opts))
+    end
   end
 
   defp with_metadata(do: conn) do
@@ -193,9 +197,7 @@ defmodule RemoteIp do
   end
 
   defp most_recent_client_given(ips, config) do
-    RemoteIp.Debug.log("Processed remote IP") do
-      Enum.reverse(ips) |> Enum.find(&client?(&1, config))
-    end
+    Enum.reverse(ips) |> Enum.find(&client?(&1, config))
   end
 
   defp client?(ip, config) do

@@ -111,6 +111,25 @@ defmodule RemoteIp.Debug do
     "#{inspect(ip)} is a reserved IP? #{if bool, do: "yes", else: "no"}"
   end
 
+  defp message_for(:call, [old], new) do
+    client = inspect(old.remote_ip)
+    origin = inspect(new.remote_ip)
+
+    if client != origin do
+      "Processed remote IP, found client #{client} to replace #{origin}"
+    else
+      "Processed remote IP, no client found to replace #{origin}"
+    end
+  end
+
+  defp message_for(:from, [], ip) do
+    if ip == nil do
+      "Processed remote IP, no client found"
+    else
+      "Processed remote IP, found client #{inspect(ip)}"
+    end
+  end
+
   # TODO: remove this clause after fleshing out all the possible message IDs
   defp message_for(id, inputs, output) do
     inspect([id: id, inputs: inputs, output: output], pretty: true)
