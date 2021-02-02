@@ -205,19 +205,19 @@ defmodule RemoteIp do
   end
 
   defp known_client?(ip, %RemoteIp.Config{clients: clients}) do
-    RemoteIp.Debug.log("#{inspect(ip)} is a known client") do
+    RemoteIp.Debug.log(:known_client, [ip]) do
       clients |> contains?(ip)
     end
   end
 
   defp known_proxy?(ip, %RemoteIp.Config{proxies: proxies}) do
-    RemoteIp.Debug.log("#{inspect(ip)} is a known proxy") do
+    RemoteIp.Debug.log(:known_proxy, [ip]) do
       proxies |> contains?(ip)
     end
   end
 
   def reserved?(ip) do
-    RemoteIp.Debug.log("#{inspect(ip)} is a reserved IP") do
+    RemoteIp.Debug.log(:reserved, [ip]) do
       @reserved |> contains?(ip)
     end
   end

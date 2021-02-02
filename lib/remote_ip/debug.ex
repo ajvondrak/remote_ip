@@ -99,6 +99,18 @@ defmodule RemoteIp.Debug do
     "Parsed IPs out of forwarding headers into: #{inspect(ips)}"
   end
 
+  defp message_for(:known_client, [ip], bool) do
+    "#{inspect(ip)} in known clients? #{if bool, do: "yes", else: "no"}"
+  end
+
+  defp message_for(:known_proxy, [ip], bool) do
+    "#{inspect(ip)} in known proxies? #{if bool, do: "yes", else: "no"}"
+  end
+
+  defp message_for(:reserved, [ip], bool) do
+    "#{inspect(ip)} is a reserved IP? #{if bool, do: "yes", else: "no"}"
+  end
+
   # TODO: remove this clause after fleshing out all the possible message IDs
   defp message_for(id, inputs, output) do
     inspect([id: id, inputs: inputs, output: output], pretty: true)
