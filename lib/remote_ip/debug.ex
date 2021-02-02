@@ -72,4 +72,9 @@ defmodule RemoteIp.Debug do
   defp message_for(msg, _, output) when is_binary(msg) do
     "#{msg}: #{inspect(output)}"
   end
+
+  # TODO: remove this clause after fleshing out all the possible message IDs
+  defp message_for(id, inputs, output) do
+    inspect([id: id, inputs: inputs, output: output], pretty: true)
+  end
 end

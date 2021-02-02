@@ -13,28 +13,18 @@ defmodule RemoteIp.DebugTest do
       Application.put_env(:remote_ip, :debug, false)
     end
 
-    test "log/2 expands into just the block" do
-      quoted = quote(do: RemoteIp.Debug.log("four", do: 2 + 2))
+    test "log/3 gets compiled away" do
+      quoted = quote(do: RemoteIp.Debug.log(:add, [2, 2], do: 2 + 2))
       assert Macro.expand_once(quoted, __ENV__) == quote(do: 2 + 2)
     end
 
-    test "log/2 evaluates the block correctly" do
-      quoted = quote(do: RemoteIp.Debug.log("four", do: 2 + 2))
-      assert eval(quoted) == 4
-    end
-
-    test "log/2 evaluates the block only once" do
+    test "log/3 does not evaluate the inputs" do
       quoted = quote do
-        RemoteIp.Debug.log("io") do
-          IO.puts("side effect")
+        RemoteIp.Debug.log(:io, [IO.puts("inputs")]) do
+          IO.puts("output")
         end
       end
-      assert capture_io(fn -> eval(quoted) end) == "side effect\n"
-    end
-
-    test "log/2 won't generate any log messages" do
-      quoted = quote(do: RemoteIp.Debug.log("four", do: 2 + 2))
-      assert capture_log(fn -> eval(quoted) end) == ""
+      assert capture_io(fn -> eval(quoted) end) == "output\n"
     end
   end
 
@@ -43,18 +33,36 @@ defmodule RemoteIp.DebugTest do
       Application.put_env(:remote_ip, :debug, true)
     end
 
-    test "log/2 evaluates the block only once" do
-      quoted = quote do
-        RemoteIp.Debug.log("io") do
-          IO.puts("side effect")
-        end
-      end
-      assert capture_io(fn -> eval(quoted) end) == "side effect\n"
+    test "log/3 generates a log message based on the id, inputs, and output" do
+      quoted = quote(do: RemoteIp.Debug.log(:add, [2, 2], do: 2 + 2))
+      logged = capture_log(fn -> eval(quoted) end)
+      assert logged =~ "id: :add, inputs: [2, 2], output: 4"
     end
 
-    test "log/2 generates a log message based on the block's return value" do
-      quoted = quote(do: RemoteIp.Debug.log("four", do: 2 + 2))
-      assert capture_log(fn -> eval(quoted) end) =~ "four: 4"
+    test "log/3 returns the output" do
+      quoted = quote(do: RemoteIp.Debug.log(:add, [2, 2], do: 2 + 2))
+      assert eval(quoted) == 4
+    end
+
+    test "log/3 evaluates the inputs" do
+      quoted = quote do
+        RemoteIp.Debug.log(:io, [IO.puts("inputs")]) do
+          IO.puts("output")
+        end
+      end
+      assert capture_io(fn -> eval(quoted) end) =~ "inputs\n"
+    end
+
+    test "log/3 evaluates the inputs prior to the output" do
+      quoted = quote do
+        struct = %{field: :before}
+        RemoteIp.Debug.log(:diff, [struct.field]) do
+          struct = %{field: :after}
+          struct.field
+        end
+      end
+      logged = capture_log(fn -> eval(quoted) end)
+      assert logged =~ "id: :diff, inputs: [:before], output: :after"
     end
   end
 end
