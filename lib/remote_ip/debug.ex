@@ -1,12 +1,6 @@
 defmodule RemoteIp.Debug do
   @moduledoc false
 
-  defmacro __using__(_) do
-    quote do
-      require Logger
-    end
-  end
-
   @doc """
   A more ergonomic wrapper for `Logger.debug/2`.
 
@@ -55,15 +49,27 @@ defmodule RemoteIp.Debug do
   usual way.)
   """
 
-  defmacro log(msg, do: block) do
+  defmacro log(id, inputs \\ [], do: output) do
     if Application.get_env(:remote_ip, :debug, false) do
       quote do
-        value = unquote(block)
-        Logger.debug("#{unquote(msg)}: #{inspect(value)}")
-        value
+        inputs = unquote(inputs)
+        output = unquote(output)
+        RemoteIp.Debug.__log__(unquote(id), inputs, output)
+        output
       end
     else
-      block
+      output
     end
+  end
+
+  require Logger
+
+  def __log__(id, inputs, output) do
+    Logger.debug(message_for(id, inputs, output))
+  end
+
+  # TODO: remove this clause; it's for temporary backwards compatibility
+  defp message_for(msg, _, output) when is_binary(msg) do
+    "#{msg}: #{inspect(output)}"
   end
 end

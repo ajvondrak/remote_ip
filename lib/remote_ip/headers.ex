@@ -3,7 +3,7 @@ defmodule RemoteIp.Headers do
   Entry point for parsing any type of forwarding header.
   """
 
-  use RemoteIp.Debug
+  require RemoteIp.Debug
 
   @doc  """
   Selects the appropriate headers and parses IPs out of them.

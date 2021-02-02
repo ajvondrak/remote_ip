@@ -2,7 +2,7 @@ defmodule RemoteIp.DebugTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
   import ExUnit.CaptureLog
-  use RemoteIp.Debug
+  require RemoteIp.Debug
 
   def eval(quoted) do
     Code.eval_quoted(quoted, [], __ENV__) |> elem(0)
