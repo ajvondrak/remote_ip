@@ -201,9 +201,7 @@ defmodule RemoteIp do
   end
 
   defp client?(ip, config) do
-    RemoteIp.Debug.log("#{inspect(ip)} is the client IP") do
-      known_client?(ip, config) || (!known_proxy?(ip, config) && !reserved?(ip))
-    end
+    known_client?(ip, config) || (!known_proxy?(ip, config) && !reserved?(ip))
   end
 
   defp known_client?(ip, %RemoteIp.Config{clients: clients}) do
