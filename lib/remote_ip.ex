@@ -181,7 +181,10 @@ defmodule RemoteIp do
   end
 
   defp last_forwarded_ip(req_headers, config) do
-    RemoteIp.Debug.log("Processing remote IP with config", do: config)
+    RemoteIp.Debug.log(:headers, do: config.headers)
+    RemoteIp.Debug.log(:proxies, do: config.proxies)
+    RemoteIp.Debug.log(:clients, do: config.clients)
+
     RemoteIp.Debug.log("Processing remote IP from headers", do: req_headers)
 
     req_headers |> ips_given(config) |> most_recent_client_given(config)

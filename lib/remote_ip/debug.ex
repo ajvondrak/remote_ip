@@ -73,6 +73,20 @@ defmodule RemoteIp.Debug do
     "#{msg}: #{inspect(output)}"
   end
 
+  defp message_for(:headers, [], headers) do
+    "Processing remote IPs using known headers: #{inspect(headers)}"
+  end
+
+  defp message_for(:proxies, [], proxies) do
+    proxies = Enum.map(proxies, &InetCidr.to_string/1)
+    "Processing remote IPs using known proxies: #{inspect(proxies)}"
+  end
+
+  defp message_for(:clients, [], clients) do
+    clients = Enum.map(clients, &InetCidr.to_string/1)
+    "Processing remote IPs using known clients: #{inspect(clients)}"
+  end
+
   # TODO: remove this clause after fleshing out all the possible message IDs
   defp message_for(id, inputs, output) do
     inspect([id: id, inputs: inputs, output: output], pretty: true)
