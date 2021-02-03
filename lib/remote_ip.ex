@@ -122,12 +122,9 @@ defmodule RemoteIp do
 
   def call(conn, %RemoteIp.Config{} = config) do
     RemoteIp.Debug.log(:call, [conn]) do
-      with_metadata do
-        case last_forwarded_ip(conn.req_headers, config) do
-          nil -> conn
-          ip  -> %{conn | remote_ip: ip}
-        end
-      end
+      ip = ip_from(conn.req_headers, config) || conn.remote_ip
+      add_metadata(ip)
+      %{conn | remote_ip: ip}
     end
   end
 
@@ -172,31 +169,30 @@ defmodule RemoteIp do
 
   def from(req_headers, opts \\ []) do
     RemoteIp.Debug.log(:from) do
-      last_forwarded_ip(req_headers, init(opts))
+      ip_from(req_headers, init(opts))
     end
   end
 
-  defp with_metadata(do: conn) do
-    case :inet.ntoa(conn.remote_ip) do
-      {:error, _} -> nil
+  defp add_metadata(remote_ip) do
+    case :inet.ntoa(remote_ip) do
+      {:error, _} -> :ok
       ip -> Logger.metadata(remote_ip: to_string(ip))
     end
-    conn
   end
 
-  defp last_forwarded_ip(req_headers, config) do
+  defp ip_from(req_headers, config) do
     RemoteIp.Debug.log(:headers, do: config.headers)
     RemoteIp.Debug.log(:proxies, do: config.proxies)
     RemoteIp.Debug.log(:clients, do: config.clients)
 
-    req_headers |> ips_given(config) |> most_recent_client_given(config)
+    ips_from(req_headers, config) |> client_from(config)
   end
 
-  defp ips_given(req_headers, %RemoteIp.Config{headers: headers}) do
+  defp ips_from(req_headers, %RemoteIp.Config{headers: headers}) do
     RemoteIp.Headers.parse(req_headers, headers)
   end
 
-  defp most_recent_client_given(ips, config) do
+  defp client_from(ips, config) do
     Enum.reverse(ips) |> Enum.find(&client?(&1, config))
   end
 
