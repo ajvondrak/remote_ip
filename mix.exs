@@ -8,6 +8,7 @@ defmodule RemoteIp.Mixfile do
      package: package(),
      description: description(),
      deps: deps(),
+     aliases: aliases(),
      docs: [source_url: "https://github.com/ajvondrak/remote_ip"]]
   end
 
@@ -32,5 +33,9 @@ defmodule RemoteIp.Mixfile do
      {:plug, "~> 1.10"},
      {:inet_cidr, "~> 1.0"},
      {:ex_doc, "~> 0.22.0", only: :dev, runtime: false}]
+  end
+
+  defp aliases do
+    [integrate: "run integration/tests.exs"]
   end
 end
