@@ -1,4 +1,5 @@
-use Mix.Config # for compatibility with Elixir >= 1.7 but < 1.9
+# TODO: `import Config` when our minimum supported Elixir is ~> 1.9
+use Mix.Config
 
 config :logger, :console,
   colors: [enabled: false],
