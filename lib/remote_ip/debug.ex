@@ -17,7 +17,8 @@ defmodule RemoteIp.Debug do
   require Logger
 
   def __log__(id, inputs, output) do
-    Logger.debug(message_for(id, inputs, output))
+    level = Application.get_env(:remote_ip, :level, :debug)
+    Logger.log(level, message_for(id, inputs, output))
   end
 
   defp message_for(:headers, [], headers) do
