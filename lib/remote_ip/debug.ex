@@ -59,8 +59,8 @@ defmodule RemoteIp.Debug do
   end
 
   defp message_for(:call, [old], new) do
-    client = inspect(old.remote_ip)
-    origin = inspect(new.remote_ip)
+    origin = inspect(old.remote_ip)
+    client = inspect(new.remote_ip)
 
     if client != origin do
       "Processed remote IP, found client #{client} to replace #{origin}"
