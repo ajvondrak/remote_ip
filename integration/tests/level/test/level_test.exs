@@ -30,10 +30,12 @@ defmodule LevelTest do
       capture_log(fn -> call(@conn, @opts) end)
       |> String.trim_trailing("\n")
       |> String.split("\n")
-      |> Enum.dedup()
 
-    assert length(logs) == 1
-    assert Enum.at(logs, 0) == "mfa=RemoteIp.Debug.__log__/3 [info]"
+    refute Enum.empty?(logs)
+
+    Enum.each(logs, fn log ->
+      assert log =~ ~r/mfa=RemoteIp.* \[info\]/
+    end)
   end
 
   test "RemoteIp.from/2" do
@@ -41,9 +43,11 @@ defmodule LevelTest do
       capture_log(fn -> from(@head, @opts) end)
       |> String.trim_trailing("\n")
       |> String.split("\n")
-      |> Enum.dedup()
 
-    assert length(logs) == 1
-    assert Enum.at(logs, 0) == "mfa=RemoteIp.Debug.__log__/3 [info]"
+    refute Enum.empty?(logs)
+
+    Enum.each(logs, fn log ->
+      assert log =~ ~r/mfa=RemoteIp.* \[info\]/
+    end)
   end
 end

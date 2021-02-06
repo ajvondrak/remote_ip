@@ -81,7 +81,7 @@ defmodule RemoteIp do
   GitHub.
   """
 
-  require RemoteIp.Debug
+  use RemoteIp.Debug
 
   @behaviour Plug
 
