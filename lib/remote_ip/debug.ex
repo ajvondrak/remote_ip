@@ -8,7 +8,7 @@ defmodule RemoteIp.Debug do
   end
 
   defmacro log(id, inputs \\ [], do: output) do
-    if Application.get_env(:remote_ip, :debug, false) do
+    if enabled?(id) do
       quote do
         inputs = unquote(inputs)
         output = unquote(output)
@@ -17,6 +17,15 @@ defmodule RemoteIp.Debug do
       end
     else
       output
+    end
+  end
+
+  @enabled Application.get_env(:remote_ip, :debug, false)
+
+  defp enabled?(id) do
+    cond do
+      is_list(@enabled) -> Enum.member?(@enabled, id)
+      is_boolean(@enabled) -> @enabled
     end
   end
 
