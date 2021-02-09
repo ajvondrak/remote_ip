@@ -85,7 +85,7 @@ defmodule RemoteIp do
 
   @behaviour Plug
 
-  def init(opts \\ []) do
+  def init(opts) do
     RemoteIp.Options.pack(opts)
   end
 
