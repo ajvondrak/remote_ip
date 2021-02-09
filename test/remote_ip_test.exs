@@ -190,6 +190,17 @@ defmodule RemoteIpTest do
       opts = [proxies: ~w[1.2.0.0/16 ::a/128 4.0.0.0/8 1::/30 8.8.8.8/32]]
       assert RemoteIp.from(head, opts) == nil
     end
+
+    test "can be an MFA" do
+      head = [{"x-forwarded-for", "1.2.3.4, 2.3.4.5"}]
+      opts = [proxies: {Application, :get_env, [:remote_ip_test, :proxies]}]
+
+      Application.put_env(:remote_ip_test, :proxies, [])
+      assert RemoteIp.from(head, opts) == {2, 3, 4, 5}
+
+      Application.put_env(:remote_ip_test, :proxies, ~w[2.0.0.0/8])
+      assert RemoteIp.from(head, opts) == {1, 2, 3, 4}
+    end
   end
 
   @clients [
@@ -219,6 +230,17 @@ defmodule RemoteIpTest do
       head = @clients
       opts = [clients: ~w[2.0.0.0/8 82.84.0.0/16 45.235.36.0/24 28.74.71.35/32]]
       assert RemoteIp.from(head, opts) == {28, 74, 71, 35}
+    end
+
+    test "can be an MFA" do
+      head = [{"x-forwarded-for", "1.2.3.4, 127.0.0.1"}]
+      opts = [clients: {Application, :get_env, [:remote_ip_test, :clients]}]
+
+      Application.put_env(:remote_ip_test, :clients, [])
+      assert RemoteIp.from(head, opts) == {1, 2, 3, 4}
+
+      Application.put_env(:remote_ip_test, :clients, ~w[127.0.0.0/8])
+      assert RemoteIp.from(head, opts) == {127, 0, 0, 1}
     end
   end
 
@@ -267,6 +289,17 @@ defmodule RemoteIpTest do
       assert RemoteIp.from(head, headers: ~w[b c a]) == {3, 4, 5, 6}
       assert RemoteIp.from(head, headers: ~w[c a b]) == {3, 4, 5, 6}
       assert RemoteIp.from(head, headers: ~w[c b a]) == {3, 4, 5, 6}
+    end
+
+    test "can be an MFA" do
+      head = [{"a", "1.2.3.4"}, {"b", "2.3.4.5"}]
+      opts = [headers: {Application, :get_env, [:remote_ip_test, :headers]}]
+
+      Application.put_env(:remote_ip_test, :headers, ~w[a])
+      assert RemoteIp.from(head, opts) == {1, 2, 3, 4}
+
+      Application.put_env(:remote_ip_test, :headers, ~w[b])
+      assert RemoteIp.from(head, opts) == {2, 3, 4, 5}
     end
   end
 
@@ -434,6 +467,58 @@ defmodule RemoteIpTest do
       ]
       opts = [proxies: ~w[2.0.0.0/8]]
       assert RemoteIp.from(head, opts) == {1, 2, 3, 4}
+    end
+  end
+
+  defmodule App do
+    use Plug.Router
+
+    plug RemoteIp,
+         headers: {__MODULE__, :config, ["HEADERS"]},
+         proxies: {__MODULE__, :config, ["PROXIES"]},
+         clients: {__MODULE__, :config, ["CLIENTS"]}
+
+    plug :match
+    plug :dispatch
+
+    get "/ip" do
+      send_resp(conn, 200, :inet.ntoa(conn.remote_ip))
+    end
+
+    def config(var) do
+      System.get_env(var, "") |> String.split(",", trim: true)
+    end
+  end
+
+  test "runtime configuration" do
+    try do
+      conn = conn(:get, "/ip")
+      conn = conn |> put_req_header("a", "1.2.3.4, 192.168.0.1, 2.3.4.5")
+      conn = conn |> put_req_header("b", "3.4.5.6, 192.168.0.1, 4.5.6.7")
+
+      assert App.call(conn, App.init([])).resp_body == "127.0.0.1"
+
+      System.put_env("HEADERS", "a")
+      assert App.call(conn, App.init([])).resp_body == "2.3.4.5"
+
+      System.put_env("PROXIES", "2.1.0.0/16,2.2.0.0/16,2.3.0.0/16")
+      assert App.call(conn, App.init([])).resp_body == "1.2.3.4"
+
+      System.put_env("CLIENTS", "192.0.0.0/8,1.2.3.4/32")
+      assert App.call(conn, App.init([])).resp_body == "192.168.0.1"
+
+      System.put_env("HEADERS", "b,c,d")
+      assert App.call(conn, App.init([])).resp_body == "4.5.6.7"
+
+      System.put_env("PROXIES", "4.5.6.0/24")
+      assert App.call(conn, App.init([])).resp_body == "192.168.0.1"
+
+      System.put_env("CLIENTS", "4.5.7.0/24")
+      assert App.call(conn, App.init([])).resp_body == "3.4.5.6"
+    after
+      System.delete_env("HEADERS")
+      System.delete_env("PROXIES")
+      System.delete_env("CLIENTS")
     end
   end
 end

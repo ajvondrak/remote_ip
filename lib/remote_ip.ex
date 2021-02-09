@@ -85,44 +85,13 @@ defmodule RemoteIp do
 
   @behaviour Plug
 
-  @headers ~w[
-    forwarded
-    x-forwarded-for
-    x-client-ip
-    x-real-ip
-  ]
-
-  @proxies []
-
-  @clients []
-
-  # https://en.wikipedia.org/wiki/Loopback
-  # https://en.wikipedia.org/wiki/Private_network
-  # https://en.wikipedia.org/wiki/Reserved_IP_addresses
-  @reserved ~w[
-    127.0.0.0/8
-    ::1/128
-    fc00::/7
-    10.0.0.0/8
-    172.16.0.0/12
-    192.168.0.0/16
-  ] |> Enum.map(&InetCidr.parse/1)
-
   def init(opts \\ []) do
-    headers = Keyword.get(opts, :headers, @headers)
-
-    proxies = Keyword.get(opts, :proxies, @proxies)
-    proxies = proxies |> Enum.map(&InetCidr.parse/1)
-
-    clients = Keyword.get(opts, :clients, @clients)
-    clients = clients |> Enum.map(&InetCidr.parse/1)
-
-    %RemoteIp.Config{headers: headers, proxies: proxies, clients: clients}
+    RemoteIp.Options.pack(opts)
   end
 
-  def call(conn, %RemoteIp.Config{} = config) do
+  def call(conn, opts) do
     RemoteIp.Debug.log(:call, [conn]) do
-      ip = ip_from(conn.req_headers, config) || conn.remote_ip
+      ip = ip_from(conn.req_headers, opts) || conn.remote_ip
       add_metadata(ip)
       %{conn | remote_ip: ip}
     end
@@ -167,9 +136,9 @@ defmodule RemoteIp do
 
   @spec from([{String.t, String.t}], keyword) :: :inet.ip_address | nil
 
-  def from(req_headers, opts \\ []) do
+  def from(headers, opts \\ []) do
     RemoteIp.Debug.log(:from) do
-      ip_from(req_headers, init(opts))
+      ip_from(headers, init(opts))
     end
   end
 
@@ -180,37 +149,46 @@ defmodule RemoteIp do
     end
   end
 
-  defp ip_from(req_headers, config) do
-    RemoteIp.Debug.log(:headers, do: config.headers)
-    RemoteIp.Debug.log(:proxies, do: config.proxies)
-    RemoteIp.Debug.log(:clients, do: config.clients)
-
-    ips_from(req_headers, config) |> client_from(config)
+  defp ip_from(headers, opts) do
+    opts = RemoteIp.Options.unpack(opts)
+    client_from(ips_from(headers, opts), opts)
   end
 
-  defp ips_from(req_headers, %RemoteIp.Config{headers: headers}) do
-    RemoteIp.Headers.parse(req_headers, headers)
+  defp ips_from(headers, opts) do
+    RemoteIp.Headers.parse(headers, opts[:headers])
   end
 
-  defp client_from(ips, config) do
-    Enum.reverse(ips) |> Enum.find(&client?(&1, config))
+  defp client_from(ips, opts) do
+    Enum.reverse(ips) |> Enum.find(&client?(&1, opts))
   end
 
-  defp client?(ip, config) do
-    known_client?(ip, config) || (!known_proxy?(ip, config) && !reserved?(ip))
+  defp client?(ip, opts) do
+    known_client?(ip, opts) || (!known_proxy?(ip, opts) && !reserved?(ip))
   end
 
-  defp known_client?(ip, %RemoteIp.Config{clients: clients}) do
+  defp known_client?(ip, opts) do
     RemoteIp.Debug.log(:known_client, [ip]) do
-      clients |> contains?(ip)
+      opts[:clients] |> contains?(ip)
     end
   end
 
-  defp known_proxy?(ip, %RemoteIp.Config{proxies: proxies}) do
+  defp known_proxy?(ip, opts) do
     RemoteIp.Debug.log(:known_proxy, [ip]) do
-      proxies |> contains?(ip)
+      opts[:proxies] |> contains?(ip)
     end
   end
+
+  # https://en.wikipedia.org/wiki/Loopback
+  # https://en.wikipedia.org/wiki/Private_network
+  # https://en.wikipedia.org/wiki/Reserved_IP_addresses
+  @reserved ~w[
+    127.0.0.0/8
+    ::1/128
+    fc00::/7
+    10.0.0.0/8
+    172.16.0.0/12
+    192.168.0.0/16
+  ] |> Enum.map(&InetCidr.parse/1)
 
   def reserved?(ip) do
     RemoteIp.Debug.log(:reserved, [ip]) do

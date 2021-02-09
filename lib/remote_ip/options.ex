@@ -1,6 +1,8 @@
 defmodule RemoteIp.Options do
   @moduledoc false # TODO
 
+  use RemoteIp.Debug
+
   def default(:headers), do: ~w[forwarded x-forwarded-for x-client-ip x-real-ip]
   def default(:proxies), do: []
   def default(:clients), do: []
@@ -22,9 +24,9 @@ defmodule RemoteIp.Options do
 
   def unpack(options) do
     [
-      headers: unpack(options, :headers),
-      proxies: unpack(options, :proxies),
-      clients: unpack(options, :clients),
+      headers: RemoteIp.Debug.log(:headers, do: unpack(options, :headers)),
+      proxies: RemoteIp.Debug.log(:proxies, do: unpack(options, :proxies)),
+      clients: RemoteIp.Debug.log(:clients, do: unpack(options, :clients)),
     ]
   end
 
