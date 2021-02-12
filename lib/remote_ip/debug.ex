@@ -22,11 +22,12 @@ defmodule RemoteIp.Debug do
 
   @enabled Application.get_env(:remote_ip, :debug, false)
 
-  defp enabled?(id) do
-    cond do
-      is_list(@enabled) -> Enum.member?(@enabled, id)
-      is_boolean(@enabled) -> @enabled
-    end
+  cond do
+    is_list(@enabled) ->
+      defp enabled?(id), do: Enum.member?(@enabled, id)
+
+    is_boolean(@enabled) ->
+      defp enabled?(_), do: @enabled
   end
 
   @level Application.get_env(:remote_ip, :level, :debug)
