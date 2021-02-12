@@ -15,3 +15,10 @@ erl_crash.dump
 
 # Also ignore archive artifacts (built via "mix archive.build").
 *.ez
+
+# Dialyzer's Persistent Lookup Tables (PLTs) cache expensive analyses, but they
+# change depending on the version of Elixir/OTP, so we don't want to commit the
+# outputs directly to version control. E.g., having one version's PLTs could
+# mess up continuous integration on a different version.
+/priv/plts/*.plt
+/priv/plts/*.plt.hash

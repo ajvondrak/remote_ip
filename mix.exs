@@ -9,6 +9,7 @@ defmodule RemoteIp.Mixfile do
      description: description(),
      deps: deps(),
      aliases: aliases(),
+     dialyzer: [plt_file: {:no_warn, "priv/plts/dialyzer.plt"}],
      docs: [source_url: "https://github.com/ajvondrak/remote_ip"]]
   end
 
@@ -32,6 +33,7 @@ defmodule RemoteIp.Mixfile do
     [{:combine, "~> 0.10"},
      {:plug, "~> 1.10"},
      {:inet_cidr, "~> 1.0"},
+     {:dialyxir, "~> 1.0", only: :dev, runtime: false},
      {:ex_doc, "~> 0.22.0", only: :dev, runtime: false}]
   end
 
