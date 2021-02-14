@@ -24,7 +24,6 @@ defmodule RemoteIp.Mixfile do
 
   defp package do
     %{files: ~w[lib mix.exs README.md LICENSE],
-      maintainers: ["Alex Vondrak"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/ajvondrak/remote_ip"}}
   end
