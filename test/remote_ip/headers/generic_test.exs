@@ -1,5 +1,6 @@
 defmodule RemoteIp.Headers.GenericTest do
   use ExUnit.Case, async: true
+
   alias RemoteIp.Headers.Generic
 
   doctest Generic

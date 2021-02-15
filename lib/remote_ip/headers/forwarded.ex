@@ -1,10 +1,10 @@
 defmodule RemoteIp.Headers.Forwarded do
+  use Combine
+
   @moduledoc """
   [RFC 7239](https://tools.ietf.org/html/rfc7239) compliant parser for
   `Forwarded` headers.
   """
-
-  use Combine
 
   @doc """
   Given a `Forwarded` header's string value, parses out IP addresses from the

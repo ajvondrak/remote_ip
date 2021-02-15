@@ -1,8 +1,8 @@
 defmodule RemoteIp.Options do
+  use RemoteIp.Debug
+
   # TODO
   @moduledoc false
-
-  use RemoteIp.Debug
 
   def default(:headers), do: ~w[forwarded x-forwarded-for x-client-ip x-real-ip]
   def default(:proxies), do: []

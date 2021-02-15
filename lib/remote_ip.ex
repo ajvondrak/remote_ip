@@ -1,4 +1,8 @@
 defmodule RemoteIp do
+  use RemoteIp.Debug
+
+  @behaviour Plug
+
   @moduledoc """
   A plug to overwrite the `Plug.Conn`'s `remote_ip` based on request headers.
 
@@ -80,10 +84,6 @@ defmodule RemoteIp do
   [README](https://github.com/ajvondrak/remote_ip/blob/master/README.md) on
   GitHub.
   """
-
-  use RemoteIp.Debug
-
-  @behaviour Plug
 
   def init(opts) do
     RemoteIp.Options.pack(opts)

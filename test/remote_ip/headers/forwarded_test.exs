@@ -1,5 +1,6 @@
 defmodule RemoteIp.Headers.ForwardedTest do
   use ExUnit.Case, async: true
+
   alias RemoteIp.Headers.Forwarded
 
   doctest Forwarded

@@ -1,9 +1,9 @@
 defmodule RemoteIp.Headers do
+  use RemoteIp.Debug
+
   @moduledoc """
   Entry point for parsing any type of forwarding header.
   """
-
-  use RemoteIp.Debug
 
   @doc """
   Selects the appropriate headers and parses IPs out of them.
