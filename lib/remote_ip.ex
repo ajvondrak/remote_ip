@@ -190,7 +190,7 @@ defmodule RemoteIp do
     192.168.0.0/16
   ] |> Enum.map(&InetCidr.parse/1)
 
-  def reserved?(ip) do
+  defp reserved?(ip) do
     RemoteIp.Debug.log(:reserved, [ip]) do
       @reserved |> contains?(ip)
     end
