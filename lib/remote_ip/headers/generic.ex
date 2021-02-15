@@ -37,14 +37,13 @@ defmodule RemoteIp.Headers.Generic do
   end
 
   defp parse_ips(strings) do
-    Enum.reduce(strings, [], fn string, ips ->
+    List.foldr(strings, [], fn string, ips ->
       case parse_ip(string) do
         {:ok, ip} -> [ip | ips]
         {:error, :einval} -> ips
         {:error, :invalid_unicode} -> ips
       end
     end)
-    |> Enum.reverse()
   end
 
   defp parse_ip(string) do
