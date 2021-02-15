@@ -90,7 +90,7 @@ defmodule RemoteIp do
   end
 
   def call(conn, opts) do
-    RemoteIp.Debug.log(:call, [conn]) do
+    RemoteIp.Debug.log :call, [conn] do
       ip = ip_from(conn.req_headers, opts) || conn.remote_ip
       add_metadata(ip)
       %{conn | remote_ip: ip}
@@ -134,10 +134,10 @@ defmodule RemoteIp do
       nil
   """
 
-  @spec from([{String.t, String.t}], keyword) :: :inet.ip_address | nil
+  @spec from([{String.t(), String.t()}], keyword) :: :inet.ip_address() | nil
 
   def from(headers, opts \\ []) do
-    RemoteIp.Debug.log(:from) do
+    RemoteIp.Debug.log :from do
       ip_from(headers, init(opts))
     end
   end
@@ -167,13 +167,13 @@ defmodule RemoteIp do
   end
 
   defp known_client?(ip, opts) do
-    RemoteIp.Debug.log(:known_client, [ip]) do
+    RemoteIp.Debug.log :known_client, [ip] do
       opts[:clients] |> contains?(ip)
     end
   end
 
   defp known_proxy?(ip, opts) do
-    RemoteIp.Debug.log(:known_proxy, [ip]) do
+    RemoteIp.Debug.log :known_proxy, [ip] do
       opts[:proxies] |> contains?(ip)
     end
   end
@@ -191,7 +191,7 @@ defmodule RemoteIp do
   ] |> Enum.map(&InetCidr.parse/1)
 
   defp reserved?(ip) do
-    RemoteIp.Debug.log(:reserved, [ip]) do
+    RemoteIp.Debug.log :reserved, [ip] do
       @reserved |> contains?(ip)
     end
   end

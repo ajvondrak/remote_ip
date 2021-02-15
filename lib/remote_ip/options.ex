@@ -1,5 +1,6 @@
 defmodule RemoteIp.Options do
-  @moduledoc false # TODO
+  # TODO
+  @moduledoc false
 
   use RemoteIp.Debug
 
@@ -11,7 +12,7 @@ defmodule RemoteIp.Options do
     [
       headers: pack(options, :headers),
       proxies: pack(options, :proxies),
-      clients: pack(options, :clients),
+      clients: pack(options, :clients)
     ]
   end
 
@@ -26,7 +27,7 @@ defmodule RemoteIp.Options do
     [
       headers: RemoteIp.Debug.log(:headers, do: unpack(options, :headers)),
       proxies: RemoteIp.Debug.log(:proxies, do: unpack(options, :proxies)),
-      clients: RemoteIp.Debug.log(:clients, do: unpack(options, :clients)),
+      clients: RemoteIp.Debug.log(:clients, do: unpack(options, :clients))
     ]
   end
 

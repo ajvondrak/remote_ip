@@ -1,5 +1,6 @@
 defmodule RemoteIp.Debug do
-  @moduledoc false # TODO
+  # TODO
+  @moduledoc false
 
   defmacro __using__(_) do
     quote do
