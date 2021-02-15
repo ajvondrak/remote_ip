@@ -29,9 +29,7 @@ defmodule RemoteIp.Headers.Generic do
   @spec parse(String.t()) :: [:inet.ip_address()]
 
   def parse(header) when is_binary(header) do
-    header
-    |> split_commas
-    |> parse_ips
+    header |> split_commas() |> parse_ips()
   end
 
   defp split_commas(header) do
@@ -51,7 +49,7 @@ defmodule RemoteIp.Headers.Generic do
 
   defp parse_ip(string) do
     try do
-      string |> to_charlist |> :inet.parse_strict_address()
+      :inet.parse_strict_address(string |> to_charlist())
     rescue
       UnicodeConversionError -> {:error, :invalid_unicode}
     end

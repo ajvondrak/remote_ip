@@ -52,7 +52,7 @@ defmodule RemoteIp.Headers.Forwarded do
   # https://tools.ietf.org/html/rfc7239#section-4
 
   defp forwarded do
-    sep_by(forwarded_element(), comma()) |> eof
+    sep_by(forwarded_element(), comma()) |> eof()
   end
 
   defp forwarded_element do
@@ -109,8 +109,8 @@ defmodule RemoteIp.Headers.Forwarded do
 
   defp ip_address do
     node_name()
-    |> ignore(option(ignore(char(":")) |> node_port))
-    |> eof
+    |> ignore(option(ignore(char(":")) |> node_port()))
+    |> eof()
   end
 
   defp node_name do
@@ -144,7 +144,7 @@ defmodule RemoteIp.Headers.Forwarded do
 
   defp ipv4_address do
     map(word_of(~r/[0-9.]/), fn string ->
-      case :inet.parse_ipv4strict_address(string |> to_charlist) do
+      case :inet.parse_ipv4strict_address(string |> to_charlist()) do
         {:ok, ip} -> ip
         {:error, :einval} -> {:error, "Invalid IPv4 address"}
       end
@@ -153,7 +153,7 @@ defmodule RemoteIp.Headers.Forwarded do
 
   defp ipv6_address do
     map(word_of(~r/[0-9a-f:.]/i), fn string ->
-      case :inet.parse_ipv6strict_address(string |> to_charlist) do
+      case :inet.parse_ipv6strict_address(string |> to_charlist()) do
         {:ok, ip} -> ip
         {:error, :einval} -> {:error, "Invalid IPv6 address"}
       end
