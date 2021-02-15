@@ -134,7 +134,7 @@ defmodule RemoteIp do
       nil
   """
 
-  @spec from([{String.t(), String.t()}], keyword) :: :inet.ip_address() | nil
+  @spec from(Plug.Conn.headers(), keyword()) :: :inet.ip_address() | nil
 
   def from(headers, opts \\ []) do
     RemoteIp.Debug.log :from do
