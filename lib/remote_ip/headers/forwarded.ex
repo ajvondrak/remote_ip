@@ -36,8 +36,7 @@ defmodule RemoteIp.Headers.Forwarded do
   defp parse_forwarded_for(pairs) do
     case pairs |> fors do
       [string] -> parse_ip(string)
-      # no `for=`s or multiple `for=`s
-      _ -> []
+      _ambiguous -> []
     end
   end
 
