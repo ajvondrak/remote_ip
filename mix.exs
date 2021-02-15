@@ -9,8 +9,8 @@ defmodule RemoteIp.Mixfile do
      description: description(),
      deps: deps(),
      aliases: aliases(),
-     dialyzer: [plt_file: {:no_warn, "priv/plts/dialyzer.plt"}],
-     docs: [source_url: "https://github.com/ajvondrak/remote_ip"]]
+     dialyzer: dialyzer(),
+     docs: docs()]
   end
 
   def application do
@@ -38,5 +38,13 @@ defmodule RemoteIp.Mixfile do
 
   defp aliases do
     [integrate: "run integration/tests.exs"]
+  end
+
+  defp dialyzer do
+    [plt_file: [no_warn: "priv/plts/dialyzer.plt"]]
+  end
+
+  defp docs do
+    [source_url: "https://github.com/ajvondrak/remote_ip"]
   end
 end
