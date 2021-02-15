@@ -26,9 +26,7 @@ defmodule RemoteIp.Headers.Generic do
       []
   """
 
-  @type header :: String.t()
-  @type ip :: :inet.ip_address()
-  @spec parse(header) :: [ip]
+  @spec parse(String.t()) :: [:inet.ip_address()]
 
   def parse(header) when is_binary(header) do
     header
