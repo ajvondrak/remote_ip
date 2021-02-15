@@ -40,8 +40,7 @@ defmodule RemoteIp.Headers.Generic do
     List.foldr(strings, [], fn string, ips ->
       case parse_ip(string) do
         {:ok, ip} -> [ip | ips]
-        {:error, :einval} -> ips
-        {:error, :invalid_unicode} -> ips
+        {:error, _} -> ips
       end
     end)
   end
