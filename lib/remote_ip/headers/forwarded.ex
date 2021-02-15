@@ -32,13 +32,13 @@ defmodule RemoteIp.Headers.Forwarded do
   end
 
   defp parse_forwarded_for(pairs) do
-    case pairs |> fors do
+    case fors_from(pairs) do
       [string] -> parse_ip(string)
       _ambiguous -> []
     end
   end
 
-  defp fors(pairs) do
+  defp fors_from(pairs) do
     for {key, val} <- pairs, String.downcase(key) == "for", do: val
   end
 
