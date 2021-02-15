@@ -3,7 +3,7 @@ defmodule RemoteIp.Headers.Generic do
   Generic parser for forwarding headers.
 
   When there is no other special `RemoteIp.Headers.*` parser submodule,
-  `RemoteIp.Headers.parse/2` will use this module to parse the header value.
+  `RemoteIp.Headers.parse/1` will use this module to parse the header value.
   So, `RemoteIp.Headers.Generic` is used to parse `X-Forwarded-For`,
   `X-Real-IP`, `X-Client-IP`, and generally unrecognized headers.
   """

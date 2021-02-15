@@ -159,7 +159,8 @@ defmodule RemoteIp do
   end
 
   defp ips_from(headers, opts) do
-    RemoteIp.Headers.parse(headers, opts[:headers])
+    headers = RemoteIp.Headers.take(headers, opts[:headers])
+    RemoteIp.Headers.parse(headers)
   end
 
   defp client_from(ips, opts) do
