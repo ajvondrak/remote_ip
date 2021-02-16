@@ -1,13 +1,22 @@
+name: Continuous Integration
+
 on: push
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: erlef/setup-elixir@v1
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Elixir
+        uses: erlef/setup-elixir@v1
         with:
           otp-version: "23.2.5"
           elixir-version: "1.11.3"
-      - run: mix deps.get
-      - run: mix test
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Run tests
+        run: mix test
