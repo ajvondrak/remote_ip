@@ -11,7 +11,8 @@ defmodule RemoteIp.Mixfile do
       deps: deps(),
       aliases: aliases(),
       dialyzer: dialyzer(),
-      docs: docs()
+      docs: docs(),
+      test_coverage: test_coverage()
     ]
   end
 
@@ -38,7 +39,8 @@ defmodule RemoteIp.Mixfile do
       {:plug, "~> 1.10"},
       {:inet_cidr, "~> 1.0"},
       {:dialyxir, "~> 1.0", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.22.0", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.22.0", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.10", only: :test, runtime: false}
     ]
   end
 
@@ -52,5 +54,9 @@ defmodule RemoteIp.Mixfile do
 
   defp docs do
     [source_url: "https://github.com/ajvondrak/remote_ip"]
+  end
+
+  defp test_coverage() do
+    [tool: ExCoveralls]
   end
 end

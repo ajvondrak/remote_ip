@@ -1,0 +1,6 @@
+{
+  "skip_files": [
+    "lib/remote_ip/debug.ex"
+  ],
+  "minimum_coverage": 100
+}
