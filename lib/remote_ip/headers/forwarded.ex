@@ -92,9 +92,7 @@ defmodule RemoteIp.Headers.Forwarded do
     word_of(~r/[\t \x21\x23-\x5B\x5D-\x7E\x80-\xFF]/)
   end
 
-  @quotable ([?\t] ++
-               Enum.to_list(0x21..0x7E) ++
-               Enum.to_list(0x80..0xFF))
+  @quotable ([?\t] ++ Enum.to_list(0x21..0x7E) ++ Enum.to_list(0x80..0xFF))
             |> Enum.map(&<<&1::utf8>>)
 
   defp quoted_pair do
