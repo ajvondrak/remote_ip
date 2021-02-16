@@ -8,7 +8,7 @@ defmodule RemoteIp.HeadersTest do
     {"b", "2.2.2.2"},
     {"y", "0.0.0.0"},
     {"c", "3.3.3.3"},
-    {"z", "0.0.0.0"},
+    {"z", "0.0.0.0"}
   ]
 
   @abc_allowed ~w[a b c]
@@ -26,36 +26,51 @@ defmodule RemoteIp.HeadersTest do
   end
 
   test "parsing Forwarded headers" do
-    ips = [{1, 2, 3, 4}, {0, 0, 0, 0, 2, 3, 4, 5}, {3, 4, 5, 6}, {0, 0, 0, 0, 4, 5, 6, 7}]
+    ips = [
+      {1, 2, 3, 4},
+      {0, 0, 0, 0, 2, 3, 4, 5},
+      {3, 4, 5, 6},
+      {0, 0, 0, 0, 4, 5, 6, 7}
+    ]
 
-    assert ips == Headers.parse([
+    headers = [
       {"forwarded", ~S'for=1.2.3.4'},
       {"forwarded", ~S'for="[::2:3:4:5]";proto=http;host=example.com'},
       {"forwarded", ~S'proto=http;for=3.4.5.6;by=127.0.0.1'},
-      {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], ~w[forwarded])
+      {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'}
+    ]
 
-    assert ips == Headers.parse([
+    assert ips == Headers.parse(headers, ~w[forwarded])
+
+    headers = [
       {"forwarded", ~S'for=1.2.3.4, for="[::2:3:4:5]";proto=http;host=example.com'},
       {"forwarded", ~S'proto=http;for=3.4.5.6;by=127.0.0.1'},
-      {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], ~w[forwarded])
+      {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'}
+    ]
 
-    assert ips == Headers.parse([
+    assert ips == Headers.parse(headers, ~w[forwarded])
+
+    headers = [
       {"forwarded", ~S'for=1.2.3.4, for="[::2:3:4:5]";proto=http;host=example.com, proto=http;for=3.4.5.6;by=127.0.0.1'},
-      {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], ~w[forwarded])
+      {"forwarded", ~S'proto=http;host=example.com;for="[::4:5:6:7]"'}
+    ]
 
-    assert ips == Headers.parse([
+    assert ips == Headers.parse(headers, ~w[forwarded])
+
+    headers = [
       {"forwarded", ~S'for=1.2.3.4'},
       {"forwarded", ~S'for="[::2:3:4:5]";proto=http;host=example.com'},
-      {"forwarded", ~S'proto=http;for=3.4.5.6;by=127.0.0.1, proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], ~w[forwarded])
+      {"forwarded", ~S'proto=http;for=3.4.5.6;by=127.0.0.1, proto=http;host=example.com;for="[::4:5:6:7]"'}
+    ]
 
-    assert ips == Headers.parse([
+    assert ips == Headers.parse(headers, ~w[forwarded])
+
+    headers = [
       {"forwarded", ~S'for=1.2.3.4'},
-      {"forwarded", ~S'for="[::2:3:4:5]";proto=http;host=example.com, proto=http;for=3.4.5.6;by=127.0.0.1, proto=http;host=example.com;for="[::4:5:6:7]"'},
-    ], ~w[forwarded])
+      {"forwarded", ~S'for="[::2:3:4:5]";proto=http;host=example.com, proto=http;for=3.4.5.6;by=127.0.0.1, proto=http;host=example.com;for="[::4:5:6:7]"'}
+    ]
+
+    assert ips == Headers.parse(headers, ~w[forwarded])
   end
 
   test "parsing generic headers" do
@@ -63,7 +78,7 @@ defmodule RemoteIp.HeadersTest do
       {"generic", "1.1.1.1, unknown, 2.2.2.2"},
       {"generic", "   3.3.3.3 ,  4.4.4.4,not_an_ip"},
       {"generic", "5.5.5.5,::6:6:6:6"},
-      {"generic", "unknown,5,7.7.7.7"},
+      {"generic", "unknown,5,7.7.7.7"}
     ]
 
     ips = [
@@ -73,7 +88,7 @@ defmodule RemoteIp.HeadersTest do
       {4, 4, 4, 4},
       {5, 5, 5, 5},
       {0, 0, 0, 0, 6, 6, 6, 6},
-      {7, 7, 7, 7},
+      {7, 7, 7, 7}
     ]
 
     assert Headers.parse(headers, ~w[generic]) == ips
@@ -83,15 +98,17 @@ defmodule RemoteIp.HeadersTest do
     headers = [
       {"x-forwarded-for", "1.1.1.1,2.2.2.2"},
       {"x-real-ip", "3.3.3.3, 4.4.4.4"},
-      {"x-client-ip", "5.5.5.5"},
+      {"x-client-ip", "5.5.5.5"}
     ]
+
     allowed = ~w[x-forwarded-for x-real-ip x-client-ip]
+
     ips = [
       {1, 1, 1, 1},
       {2, 2, 2, 2},
       {3, 3, 3, 3},
       {4, 4, 4, 4},
-      {5, 5, 5, 5},
+      {5, 5, 5, 5}
     ]
 
     assert Headers.parse(headers, allowed) == ips
@@ -106,7 +123,7 @@ defmodule RemoteIp.HeadersTest do
       {"forwarded", "for=5.5.5.5"},
       {"x-forwarded-for", "6.6.6.6"},
       {"x-forwarded-for", "7.7.7.7"},
-      {"not-allowed", "10.10.10.10"},
+      {"not-allowed", "10.10.10.10"}
     ]
 
     allowed = ~w[forwarded x-forwarded-for]
@@ -118,7 +135,7 @@ defmodule RemoteIp.HeadersTest do
       {4, 4, 4, 4},
       {5, 5, 5, 5},
       {6, 6, 6, 6},
-      {7, 7, 7, 7},
+      {7, 7, 7, 7}
     ]
 
     assert Headers.parse(headers, allowed) == ips

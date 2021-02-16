@@ -9,7 +9,7 @@ defmodule RemoteIpTest do
     {"x-forwarded-for", "not_an_ip"},
     {"x-client-ip", "_obf"},
     {"x-real-ip", "1.2.3"},
-    {"custom", "::g"},
+    {"custom", "::g"}
   ]
 
   @loopback [
@@ -17,7 +17,7 @@ defmodule RemoteIpTest do
     {"x-forwarded-for", "::1"},
     {"x-client-ip", "127.0.0.2"},
     {"x-real-ip", "::::::1"},
-    {"custom", "127.127.127.127"},
+    {"custom", "127.127.127.127"}
   ]
 
   @private [
@@ -25,7 +25,7 @@ defmodule RemoteIpTest do
     {"x-forwarded-for", "172.16.0.1"},
     {"x-client-ip", "fd00::"},
     {"x-real-ip", "192.168.10.10"},
-    {"custom", "172.31.41.59"},
+    {"custom", "172.31.41.59"}
   ]
 
   @public_v4 [
@@ -33,7 +33,7 @@ defmodule RemoteIpTest do
     {"x-forwarded-for", "2.71.82.8"},
     {"x-client-ip", "2.71.82.8"},
     {"x-real-ip", "2.71.82.8"},
-    {"custom", "2.71.82.8"},
+    {"custom", "2.71.82.8"}
   ]
 
   @public_v6 [
@@ -41,7 +41,7 @@ defmodule RemoteIpTest do
     {"x-forwarded-for", "::247:5208"},
     {"x-client-ip", "0:0:0:0:0:0:2.71.82.8"},
     {"x-real-ip", "0::0:247:5208"},
-    {"custom", "0:0::2.71.82.8"},
+    {"custom", "0:0::2.71.82.8"}
   ]
 
   def call(conn, opts \\ []) do
@@ -54,7 +54,7 @@ defmodule RemoteIpTest do
       head = []
       conn = %Plug.Conn{remote_ip: peer, req_headers: head}
       assert call(conn).remote_ip == peer
-      assert Logger.metadata[:remote_ip] == "86.75.30.9"
+      assert Logger.metadata()[:remote_ip] == "86.75.30.9"
     end
 
     for {header, value} <- @unknown do
@@ -64,29 +64,29 @@ defmodule RemoteIpTest do
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == peer
-        assert Logger.metadata[:remote_ip] == "1.2.3.4"
+        assert Logger.metadata()[:remote_ip] == "1.2.3.4"
       end
     end
 
     for {header, value} <- @loopback do
       test "#{header} header from loopback IP" do
-        peer = {0xd, 0xe, 0xa, 0xd, 0xb, 0xe, 0xe, 0xf}
+        peer = {0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF}
         head = [{unquote(header), unquote(value)}]
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == peer
-        assert Logger.metadata[:remote_ip] == "d:e:a:d:b:e:e:f"
+        assert Logger.metadata()[:remote_ip] == "d:e:a:d:b:e:e:f"
       end
     end
 
     for {header, value} <- @private do
       test "#{header} header from private IP" do
-        peer = {0xde, 0xad, 0, 0, 0, 0, 0xbe, 0xef}
+        peer = {0xDE, 0xAD, 0, 0, 0, 0, 0xBE, 0xEF}
         head = [{unquote(header), unquote(value)}]
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == peer
-        assert Logger.metadata[:remote_ip] == "de:ad::be:ef"
+        assert Logger.metadata()[:remote_ip] == "de:ad::be:ef"
       end
     end
 
@@ -97,7 +97,7 @@ defmodule RemoteIpTest do
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == {2, 71, 82, 8}
-        assert Logger.metadata[:remote_ip] == "2.71.82.8"
+        assert Logger.metadata()[:remote_ip] == "2.71.82.8"
       end
     end
 
@@ -108,7 +108,7 @@ defmodule RemoteIpTest do
         conn = %Plug.Conn{remote_ip: peer, req_headers: head}
         opts = [headers: [unquote(header)]]
         assert call(conn, opts).remote_ip == {0, 0, 0, 0, 0, 0, 583, 21000}
-        assert Logger.metadata[:remote_ip] == "::2.71.82.8"
+        assert Logger.metadata()[:remote_ip] == "::2.71.82.8"
       end
     end
   end
@@ -117,7 +117,7 @@ defmodule RemoteIpTest do
     test "no headers" do
       head = []
       assert RemoteIp.from(head) == nil
-      assert Logger.metadata[:remote_ip] == nil
+      assert Logger.metadata()[:remote_ip] == nil
     end
 
     for {header, value} <- @unknown do
@@ -125,7 +125,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == nil
-        assert Logger.metadata[:remote_ip] == nil
+        assert Logger.metadata()[:remote_ip] == nil
       end
     end
 
@@ -134,7 +134,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == nil
-        assert Logger.metadata[:remote_ip] == nil
+        assert Logger.metadata()[:remote_ip] == nil
       end
     end
 
@@ -143,7 +143,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == nil
-        assert Logger.metadata[:remote_ip] == nil
+        assert Logger.metadata()[:remote_ip] == nil
       end
     end
 
@@ -152,7 +152,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == {2, 71, 82, 8}
-        assert Logger.metadata[:remote_ip] == nil
+        assert Logger.metadata()[:remote_ip] == nil
       end
     end
 
@@ -161,7 +161,7 @@ defmodule RemoteIpTest do
         head = [{unquote(header), unquote(value)}]
         opts = [headers: [unquote(header)]]
         assert RemoteIp.from(head, opts) == {0, 0, 0, 0, 0, 0, 583, 21000}
-        assert Logger.metadata[:remote_ip] == nil
+        assert Logger.metadata()[:remote_ip] == nil
       end
     end
   end
@@ -170,7 +170,7 @@ defmodule RemoteIpTest do
     {"forwarded", "for=1.2.3.4"},
     {"x-forwarded-for", "::a"},
     {"x-client-ip", "1:2:3:4:5:6:7:8"},
-    {"x-real-ip", "4.4.4.4"},
+    {"x-real-ip", "4.4.4.4"}
   ]
 
   describe ":proxies option" do
@@ -208,7 +208,7 @@ defmodule RemoteIpTest do
     {"forwarded", "for=2.71.82.81"},
     {"x-forwarded-for", "82.84.59.0"},
     {"x-client-ip", "45.235.36.0"},
-    {"x-real-ip", "28.74.71.35"},
+    {"x-real-ip", "28.74.71.35"}
   ]
 
   describe ":clients option" do
@@ -220,10 +220,12 @@ defmodule RemoteIpTest do
 
     test "can allow known proxies" do
       head = @clients
+
       opts = [
         proxies: ~w[2.0.0.0/8 82.84.0.0/16 45.235.36.0/24 28.74.71.35/32],
-        clients: ~w[2.71.0.0/16],
+        clients: ~w[2.71.0.0/16]
       ]
+
       assert RemoteIp.from(head, opts) == {2, 71, 82, 81}
     end
 
@@ -249,7 +251,7 @@ defmodule RemoteIpTest do
     {"forwarded", "for=1.2.3.4"},
     {"x-forwarded-for", "1.2.3.4"},
     {"x-client-ip", "1.2.3.4"},
-    {"x-real-ip", "1.2.3.4"},
+    {"x-real-ip", "1.2.3.4"}
   ]
 
   describe ":headers option" do
@@ -406,6 +408,7 @@ defmodule RemoteIpTest do
         {"x-real-ip", "2001:0db8:85a3:0000:0000:8A2E:0370:7334"},
         {"x-real-ip", "127.0.0.2"}
       ]
+
       opts = [proxies: ~w[2001:0db8:85a3::8A2E:0370:7334/128]]
       assert RemoteIp.from(head, opts) == nil
     end
@@ -466,6 +469,7 @@ defmodule RemoteIpTest do
         {"x-client-ip", "::1, ::1"},
         {"x-real-ip", "2.3.4.5, fc00::1, 2.4.6.8"}
       ]
+
       opts = [proxies: ~w[2.0.0.0/8]]
       assert RemoteIp.from(head, opts) == {1, 2, 3, 4}
     end
@@ -475,9 +479,9 @@ defmodule RemoteIpTest do
     use Plug.Router
 
     plug RemoteIp,
-         headers: {__MODULE__, :config, ["HEADERS"]},
-         proxies: {__MODULE__, :config, ["PROXIES"]},
-         clients: {__MODULE__, :config, ["CLIENTS"]}
+      headers: {__MODULE__, :config, ["HEADERS"]},
+      proxies: {__MODULE__, :config, ["PROXIES"]},
+      clients: {__MODULE__, :config, ["CLIENTS"]}
 
     plug :match
     plug :dispatch
