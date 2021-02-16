@@ -1,7 +1,7 @@
 defmodule Integration.Tests do
   @path Path.join(__DIR__, "tests")
 
-  if IO.ANSI.enabled? do
+  if IO.ANSI.enabled?() do
     @color "--color"
   else
     @color "--no-color"
@@ -32,4 +32,4 @@ defmodule Integration.Tests do
   end
 end
 
-Integration.Tests.run
+Integration.Tests.run()
