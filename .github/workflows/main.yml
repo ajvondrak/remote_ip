@@ -3,7 +3,14 @@ name: Continuous Integration
 on: push
 
 jobs:
+  strategy:
+    matrix:
+      include:
+        - elixir: "1.11.3"
+          otp: "23.2.5"
+
   ci:
+    name: Elixir ${{ matrix.elixir }} (OTP ${{ matrix.otp }})
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -12,8 +19,8 @@ jobs:
       - name: Install Elixir
         uses: erlef/setup-elixir@v1
         with:
-          otp-version: "23.2.5"
-          elixir-version: "1.11.3"
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
 
       - name: Install dependencies
         run: mix deps.get
