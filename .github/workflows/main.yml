@@ -59,6 +59,14 @@ jobs:
       - name: Run unit tests
         run: mix test --cover
 
+      - name: Restore cached integrations
+        uses: actions/cache@v2
+        with:
+          key: integrations@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('integration/tests/*/mix.lock') }}
+          path: |
+            integration/tests/*/deps
+            integration/tests/*/_build
+
       - name: Run integration tests
         run: mix integrate
 
