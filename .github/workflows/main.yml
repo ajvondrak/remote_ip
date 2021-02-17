@@ -65,3 +65,12 @@ jobs:
 
       - name: Run integration tests
         run: mix integrate
+
+      - name: Restore cached PLTs
+        uses: actions/cache@v2
+        with:
+          path: priv
+          key: plts-${{ runner.os }}-elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
+
+      - name: Run dialyzer
+        run: mix dialyzer
