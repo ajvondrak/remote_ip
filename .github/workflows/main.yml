@@ -1,7 +1,7 @@
 name: Continuous Integration
 
 env:
-  MIX_ENV: test
+  MIX_ENV: ci
 
 on: push
 
@@ -43,13 +43,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: deps
-          key: deps-${{ runner.os }}-elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
+          key: deps@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
 
       - name: Restore cached build
         uses: actions/cache@v2
         with:
           path: _build
-          key: build-${{ runner.os }}-elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
+          key: build@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
 
       - name: Install dependencies
         run: mix do deps.get, deps.compile
@@ -70,7 +70,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: priv
-          key: plts-${{ runner.os }}-elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
+          key: plts@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
 
       - name: Run dialyzer
         run: mix dialyzer
