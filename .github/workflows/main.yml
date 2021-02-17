@@ -39,17 +39,13 @@ jobs:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
 
-      - name: Restore cached dependencies
-        uses: actions/cache@v2
-        with:
-          path: deps
-          key: deps@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
-
       - name: Restore cached build
         uses: actions/cache@v2
         with:
-          path: _build
-          key: build@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
+          key: builds@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
+          path: |
+            deps
+            _build
 
       - name: Install dependencies
         run: mix do deps.get, deps.compile
