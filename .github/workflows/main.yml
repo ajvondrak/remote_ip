@@ -35,11 +35,11 @@ jobs:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
 
-      - name: Check formatting
-        run: mix format --check-formatted
-
       - name: Install dependencies
         run: mix do deps.get, deps.compile
+
+      - name: Check formatting
+        run: mix format --check-formatted
 
       - name: Compile
         run: mix compile --warnings-as-errors
