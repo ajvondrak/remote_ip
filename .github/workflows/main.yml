@@ -69,8 +69,11 @@ jobs:
       - name: Restore cached PLTs
         uses: actions/cache@v2
         with:
-          path: priv
           key: plts@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
+          path: |
+            priv
+          restore-keys: |
+            plts@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-
 
       - name: Run dialyzer
         run: mix dialyzer
