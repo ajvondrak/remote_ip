@@ -60,5 +60,8 @@ jobs:
       - name: Compile
         run: mix compile --warnings-as-errors
 
-      - name: Run tests
+      - name: Run unit tests
         run: mix test --cover
+
+      - name: Run integration tests
+        run: mix integrate
