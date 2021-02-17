@@ -1,9 +1,13 @@
 name: Continuous Integration
 
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
 env:
   MIX_ENV: ci
-
-on: push
 
 jobs:
   ci:
