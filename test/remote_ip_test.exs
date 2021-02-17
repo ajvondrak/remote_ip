@@ -491,7 +491,7 @@ defmodule RemoteIpTest do
     end
 
     def config(var) do
-      System.get_env(var, "") |> String.split(",", trim: true)
+      System.get_env() |> Map.get(var, "") |> String.split(",", trim: true)
     end
   end
 
