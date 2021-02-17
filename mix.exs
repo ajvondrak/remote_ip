@@ -49,7 +49,7 @@ defmodule RemoteIp.Mixfile do
   end
 
   defp dialyzer do
-    [plt_file: [no_warn: "priv/plts/dialyzer.plt"]]
+    [plt_file: {:no_warn, "priv/plts/dialyzer.plt"}]
   end
 
   defp docs do
