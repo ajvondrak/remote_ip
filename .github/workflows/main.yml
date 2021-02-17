@@ -36,7 +36,10 @@ jobs:
           elixir-version: ${{ matrix.elixir }}
 
       - name: Install dependencies
-        run: mix deps.get
+        run: mix do deps.get, deps.compile
+
+      - name: Compile
+        run: mix compile --warnings-as-errors
 
       - name: Run tests
         run: mix test
