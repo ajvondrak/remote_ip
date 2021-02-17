@@ -1,5 +1,8 @@
 name: Continuous Integration
 
+env:
+  MIX_ENV: test
+
 on: push
 
 jobs:
