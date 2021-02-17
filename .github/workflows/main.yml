@@ -43,7 +43,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: deps
-          key: mix-${{ runner.os }}-elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-${{ hashFiles('mix.lock') }}
+          key: deps-${{ runner.os }}-elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
+
+      - name: Restore cached build
+        uses: actions/cache@v2
+        with:
+          path: _build
+          key: build-${{ runner.os }}-elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
 
       - name: Install dependencies
         run: mix do deps.get, deps.compile
