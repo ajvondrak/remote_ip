@@ -4,6 +4,6 @@ use Mix.Config
 config :logger, :console,
   format: "$metadata[$level]\n",
   colors: [enabled: false],
-  metadata: [:mfa]
+  metadata: [:application]
 
 config :remote_ip, debug: true, level: :info

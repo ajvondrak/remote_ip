@@ -34,7 +34,7 @@ defmodule LevelTest do
     refute Enum.empty?(logs)
 
     Enum.each(logs, fn log ->
-      assert log =~ ~r/mfa=RemoteIp.* \[info\]/
+      assert log == "application=remote_ip \[info\]"
     end)
   end
 
@@ -47,7 +47,7 @@ defmodule LevelTest do
     refute Enum.empty?(logs)
 
     Enum.each(logs, fn log ->
-      assert log =~ ~r/mfa=RemoteIp.* \[info\]/
+      assert log == "application=remote_ip \[info\]"
     end)
   end
 end
