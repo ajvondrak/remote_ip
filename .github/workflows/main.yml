@@ -63,7 +63,9 @@ jobs:
         run: mix compile --warnings-as-errors
 
       - name: Run unit tests
-        run: mix test --cover
+        run: mix coveralls.github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore cached integrations
         uses: actions/cache@v2
