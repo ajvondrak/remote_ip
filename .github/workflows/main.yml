@@ -29,11 +29,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install Elixir
+      - id: install
+        name: Install Elixir
         uses: erlef/setup-elixir@v1
         with:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
+
+      - name: Restore cached dependencies
+        uses: actions/cache@v2
+        with:
+          path: deps
+          key: mix-${{ runner.os }}-elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-${{ hashFiles('mix.lock') }}
 
       - name: Install dependencies
         run: mix do deps.get, deps.compile
