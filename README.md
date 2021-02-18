@@ -1,6 +1,6 @@
 # RemoteIp
 
-[![continuous integration status](https://github.com/ajvondrak/remote_ip/workflows/Continuous%20Integration/badge.svg)](https://github.com/ajvondrak/remote_ip/actions?query=workflow%3A%22Continuous+Integration%22)
+[![build status](https://github.com/ajvondrak/remote_ip/workflows/build/badge.svg)](https://github.com/ajvondrak/remote_ip/actions?query=workflow%3Abuild)
 [![coverage status](https://coveralls.io/repos/github/ajvondrak/remote_ip/badge.svg?branch=main)](https://coveralls.io/github/ajvondrak/remote_ip?branch=main)
 [![hex.pm version](https://img.shields.io/hexpm/v/remote_ip)](https://hex.pm/packages/remote_ip)
 
