@@ -1,5 +1,5 @@
 defmodule RemoteIp do
-  use RemoteIp.Debug
+  use RemoteIp.Debugger
 
   @behaviour Plug
 
@@ -94,7 +94,7 @@ defmodule RemoteIp do
   @impl true
 
   def call(conn, opts) do
-    RemoteIp.Debug.log :call, [conn] do
+    debug :call, [conn] do
       ip = ip_from(conn.req_headers, opts) || conn.remote_ip
       add_metadata(ip)
       %{conn | remote_ip: ip}
@@ -141,26 +141,33 @@ defmodule RemoteIp do
   @spec from(Plug.Conn.headers(), keyword()) :: :inet.ip_address() | nil
 
   def from(headers, opts \\ []) do
-    RemoteIp.Debug.log :from do
+    debug :from do
       ip_from(headers, init(opts))
     end
   end
 
-  defp add_metadata(remote_ip) do
-    case :inet.ntoa(remote_ip) do
-      {:error, _} -> :ok
-      ip -> Logger.metadata(remote_ip: to_string(ip))
-    end
-  end
-
   defp ip_from(headers, opts) do
-    opts = RemoteIp.Options.unpack(opts)
+    opts = options_from(opts)
     client_from(ips_from(headers, opts), opts)
   end
 
+  defp options_from(opts) do
+    debug :options do
+      RemoteIp.Options.unpack(opts)
+    end
+  end
+
   defp ips_from(headers, opts) do
-    headers = RemoteIp.Headers.take(headers, opts[:headers])
-    RemoteIp.Headers.parse(headers)
+    debug :ips do
+      headers = forwarding_from(headers, opts)
+      RemoteIp.Headers.parse(headers)
+    end
+  end
+
+  defp forwarding_from(headers, opts) do
+    debug :forwarding do
+      debug(:headers, do: headers) |> RemoteIp.Headers.take(opts[:headers])
+    end
   end
 
   defp client_from(ips, opts) do
@@ -184,7 +191,7 @@ defmodule RemoteIp do
   ] |> Enum.map(&InetCidr.parse/1)
 
   defp type(ip, opts) do
-    RemoteIp.Debug.log :type, [ip] do
+    debug :type, [ip] do
       cond do
         opts[:clients] |> contains?(ip) -> :client
         opts[:proxies] |> contains?(ip) -> :proxy
@@ -196,5 +203,12 @@ defmodule RemoteIp do
 
   defp contains?(cidrs, ip) do
     Enum.any?(cidrs, &InetCidr.contains?(&1, ip))
+  end
+
+  defp add_metadata(remote_ip) do
+    case :inet.ntoa(remote_ip) do
+      {:error, _} -> :ok
+      ip -> Logger.metadata(remote_ip: to_string(ip))
+    end
   end
 end

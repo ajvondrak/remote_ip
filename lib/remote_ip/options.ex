@@ -1,6 +1,4 @@
 defmodule RemoteIp.Options do
-  use RemoteIp.Debug
-
   # TODO
   @moduledoc false
 
@@ -24,13 +22,11 @@ defmodule RemoteIp.Options do
   end
 
   def unpack(options) do
-    RemoteIp.Debug.log :options do
-      [
-        headers: unpack(options, :headers),
-        proxies: unpack(options, :proxies),
-        clients: unpack(options, :clients)
-      ]
-    end
+    [
+      headers: unpack(options, :headers),
+      proxies: unpack(options, :proxies),
+      clients: unpack(options, :clients)
+    ]
   end
 
   defp unpack(options, option) do

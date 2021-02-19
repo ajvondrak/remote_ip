@@ -1,19 +1,20 @@
-defmodule RemoteIp.Debug do
+defmodule RemoteIp.Debugger do
   # TODO
   @moduledoc false
 
   defmacro __using__(_) do
     quote do
       require Logger
+      import unquote(__MODULE__)
     end
   end
 
-  defmacro log(id, inputs \\ [], do: output) do
-    if enabled?(id) do
+  defmacro debug(id, inputs \\ [], do: output) do
+    if debug?(id) do
       quote do
         inputs = unquote(inputs)
         output = unquote(output)
-        RemoteIp.Debug.__log__(unquote(id), inputs, output)
+        unquote(__MODULE__).__log__(unquote(id), inputs, output)
         output
       end
     else
@@ -21,14 +22,14 @@ defmodule RemoteIp.Debug do
     end
   end
 
-  @enabled Application.get_env(:remote_ip, :debug, false)
+  @debug Application.get_env(:remote_ip, :debug, false)
 
   cond do
-    is_list(@enabled) ->
-      defp enabled?(id), do: Enum.member?(@enabled, id)
+    is_list(@debug) ->
+      defp debug?(id), do: Enum.member?(@debug, id)
 
-    is_boolean(@enabled) ->
-      defp enabled?(_), do: @enabled
+    is_boolean(@debug) ->
+      defp debug?(_), do: @debug
   end
 
   @level Application.get_env(:remote_ip, :level, :debug)
@@ -37,7 +38,7 @@ defmodule RemoteIp.Debug do
     quote do
       Logger.log(
         unquote(@level),
-        RemoteIp.Debug.__message__(
+        unquote(__MODULE__).__message__(
           unquote(id),
           unquote(inputs),
           unquote(output)

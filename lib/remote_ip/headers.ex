@@ -1,6 +1,4 @@
 defmodule RemoteIp.Headers do
-  use RemoteIp.Debug
-
   @moduledoc """
   Functions for parsing IPs from multiple types of forwarding headers.
   """
@@ -25,13 +23,7 @@ defmodule RemoteIp.Headers do
   @spec take(Plug.Conn.headers(), [String.t()]) :: Plug.Conn.headers()
 
   def take(headers, names) do
-    RemoteIp.Debug.log :headers do
-      headers
-    end
-
-    RemoteIp.Debug.log :forwarding do
-      Enum.filter(headers, fn {name, _} -> name in names end)
-    end
+    Enum.filter(headers, fn {name, _} -> name in names end)
   end
 
   @doc """
@@ -71,9 +63,7 @@ defmodule RemoteIp.Headers do
   @spec parse(Plug.Conn.headers()) :: [:inet.ip_address()]
 
   def parse(headers) do
-    RemoteIp.Debug.log :ips do
-      Enum.flat_map(headers, fn {name, value} -> parse(name, value) end)
-    end
+    Enum.flat_map(headers, fn {name, value} -> parse(name, value) end)
   end
 
   defp parse("forwarded", value) do
