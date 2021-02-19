@@ -25,11 +25,11 @@ defmodule RemoteIp.Headers do
   @spec take(Plug.Conn.headers(), [String.t()]) :: Plug.Conn.headers()
 
   def take(headers, names) do
-    RemoteIp.Debug.log :req do
+    RemoteIp.Debug.log :headers do
       headers
     end
 
-    RemoteIp.Debug.log :fwd do
+    RemoteIp.Debug.log :forwarding do
       Enum.filter(headers, fn {name, _} -> name in names end)
     end
   end

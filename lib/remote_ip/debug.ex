@@ -59,11 +59,11 @@ defmodule RemoteIp.Debug do
     ]
   end
 
-  def __message__(:req, [], headers) do
+  def __message__(:headers, [], headers) do
     "Processing remote IP from request headers: #{inspect(headers)}"
   end
 
-  def __message__(:fwd, [], headers) do
+  def __message__(:forwarding, [], headers) do
     "Parsing IPs from known forwarding headers: #{inspect(headers)}"
   end
 
