@@ -72,16 +72,13 @@ defmodule RemoteIp.Debug do
     "Parsed IPs out of forwarding headers into: #{inspect(ips)}"
   end
 
-  def __message__(:known_client, [ip], bool) do
-    "#{inspect(ip)} in known clients? #{if bool, do: "yes", else: "no"}"
-  end
-
-  def __message__(:known_proxy, [ip], bool) do
-    "#{inspect(ip)} in known proxies? #{if bool, do: "yes", else: "no"}"
-  end
-
-  def __message__(:reserved, [ip], bool) do
-    "#{inspect(ip)} is a reserved IP? #{if bool, do: "yes", else: "no"}"
+  def __message__(:type, [ip], type) do
+    case type do
+      :client -> "#{inspect(ip)} is a known client IP"
+      :proxy -> "#{inspect(ip)} is a known proxy IP"
+      :reserved -> "#{inspect(ip)} is a reserved IP"
+      :unknown -> "#{inspect(ip)} is an unknown IP, assuming it's the client"
+    end
   end
 
   def __message__(:call, [old], new) do

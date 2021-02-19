@@ -168,19 +168,7 @@ defmodule RemoteIp do
   end
 
   defp client?(ip, opts) do
-    known_client?(ip, opts) || (!known_proxy?(ip, opts) && !reserved?(ip))
-  end
-
-  defp known_client?(ip, opts) do
-    RemoteIp.Debug.log :known_client, [ip] do
-      opts[:clients] |> contains?(ip)
-    end
-  end
-
-  defp known_proxy?(ip, opts) do
-    RemoteIp.Debug.log :known_proxy, [ip] do
-      opts[:proxies] |> contains?(ip)
-    end
+    type(ip, opts) in [:client, :unknown]
   end
 
   # https://en.wikipedia.org/wiki/Loopback
@@ -195,9 +183,14 @@ defmodule RemoteIp do
     192.168.0.0/16
   ] |> Enum.map(&InetCidr.parse/1)
 
-  defp reserved?(ip) do
-    RemoteIp.Debug.log :reserved, [ip] do
-      @reserved |> contains?(ip)
+  defp type(ip, opts) do
+    RemoteIp.Debug.log :type, [ip] do
+      cond do
+        opts[:clients] |> contains?(ip) -> :client
+        opts[:proxies] |> contains?(ip) -> :proxy
+        @reserved |> contains?(ip) -> :reserved
+        true -> :unknown
+      end
     end
   end
 
