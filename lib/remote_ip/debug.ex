@@ -46,18 +46,17 @@ defmodule RemoteIp.Debug do
     end
   end
 
-  def __message__(:headers, [], headers) do
-    "Processing remote IPs using known headers: #{inspect(headers)}"
-  end
+  def __message__(:options, [], options) do
+    headers = inspect(options[:headers])
+    proxies = inspect(options[:proxies] |> Enum.map(&InetCidr.to_string/1))
+    clients = inspect(options[:clients] |> Enum.map(&InetCidr.to_string/1))
 
-  def __message__(:proxies, [], proxies) do
-    proxies = Enum.map(proxies, &InetCidr.to_string/1)
-    "Processing remote IPs using known proxies: #{inspect(proxies)}"
-  end
-
-  def __message__(:clients, [], clients) do
-    clients = Enum.map(clients, &InetCidr.to_string/1)
-    "Processing remote IPs using known clients: #{inspect(clients)}"
+    [
+      "Processing remote IP\n",
+      "  headers: #{headers}\n",
+      "  proxies: #{proxies}\n",
+      "  clients: #{clients}"
+    ]
   end
 
   def __message__(:req, [], headers) do
