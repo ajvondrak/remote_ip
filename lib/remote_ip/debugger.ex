@@ -61,15 +61,15 @@ defmodule RemoteIp.Debugger do
   end
 
   def __message__(:headers, [], headers) do
-    "Processing remote IP from request headers: #{inspect(headers)}"
+    "Taking forwarding headers from #{inspect(headers)}"
   end
 
   def __message__(:forwarding, [], headers) do
-    "Parsing IPs from known forwarding headers: #{inspect(headers)}"
+    "Parsing IPs from forwarding headers: #{inspect(headers)}"
   end
 
   def __message__(:ips, [], ips) do
-    "Parsed IPs out of forwarding headers into: #{inspect(ips)}"
+    "Parsed IPs from forwarding headers: #{inspect(ips)}"
   end
 
   def __message__(:type, [ip], type) do

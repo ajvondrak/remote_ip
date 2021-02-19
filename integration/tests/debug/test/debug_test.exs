@@ -35,9 +35,9 @@ defmodule DebugTest do
                headers: ["xff"]
                proxies: ["1.2.0.0/16", "2.3.4.5/32"]
                clients: []
-             [debug] Processing remote IP from request headers: [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsing IPs from known forwarding headers: [{"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsed IPs out of forwarding headers into: [{1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
+             [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsing IPs from forwarding headers: [{"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsed IPs from forwarding headers: [{1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
              [debug] {2, 3, 4, 5} is a known proxy IP
              [debug] {10, 0, 0, 1} is a reserved IP
              [debug] {1, 2, 3, 4} is a known proxy IP
@@ -57,9 +57,9 @@ defmodule DebugTest do
                headers: ["xff"]
                proxies: ["1.2.0.0/16", "2.3.4.5/32"]
                clients: ["1.2.3.4/32"]
-             [debug] Processing remote IP from request headers: [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsing IPs from known forwarding headers: [{"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsed IPs out of forwarding headers into: [{1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
+             [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsing IPs from forwarding headers: [{"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsed IPs from forwarding headers: [{1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
              [debug] {2, 3, 4, 5} is a known proxy IP
              [debug] {10, 0, 0, 1} is a reserved IP
              [debug] {1, 2, 3, 4} is a known client IP
@@ -79,9 +79,9 @@ defmodule DebugTest do
                headers: ["xff"]
                proxies: ["2.3.4.5/32"]
                clients: []
-             [debug] Processing remote IP from request headers: [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsing IPs from known forwarding headers: [{"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsed IPs out of forwarding headers into: [{1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
+             [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsing IPs from forwarding headers: [{"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsed IPs from forwarding headers: [{1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
              [debug] {2, 3, 4, 5} is a known proxy IP
              [debug] {10, 0, 0, 1} is a reserved IP
              [debug] {1, 2, 3, 4} is an unknown IP, assuming it's the client
@@ -103,9 +103,9 @@ defmodule DebugTest do
                headers: []
                proxies: ["1.2.0.0/16", "2.3.4.5/32"]
                clients: ["1.0.0.0/8", "2.0.0.0/8", "3.0.0.0/8"]
-             [debug] Processing remote IP from request headers: [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsing IPs from known forwarding headers: []
-             [debug] Parsed IPs out of forwarding headers into: []
+             [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsing IPs from forwarding headers: []
+             [debug] Parsed IPs from forwarding headers: []
              [debug] Processed remote IP, no client found
              """
     end
@@ -122,9 +122,9 @@ defmodule DebugTest do
                headers: ["x-forwarded-for"]
                proxies: ["1.2.0.0/16", "2.3.4.5/32"]
                clients: ["3.0.0.0/8"]
-             [debug] Processing remote IP from request headers: [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsing IPs from known forwarding headers: [{"x-forwarded-for", "3.14.15.9"}]
-             [debug] Parsed IPs out of forwarding headers into: [{3, 14, 15, 9}]
+             [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsing IPs from forwarding headers: [{"x-forwarded-for", "3.14.15.9"}]
+             [debug] Parsed IPs from forwarding headers: [{3, 14, 15, 9}]
              [debug] {3, 14, 15, 9} is a known client IP
              [debug] Processed remote IP, found client {3, 14, 15, 9}
              """
@@ -142,9 +142,9 @@ defmodule DebugTest do
                headers: ["x-forwarded-for", "xff"]
                proxies: ["2.3.4.5/32", "3.0.0.0/8"]
                clients: []
-             [debug] Processing remote IP from request headers: [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsing IPs from known forwarding headers: [{"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
-             [debug] Parsed IPs out of forwarding headers into: [{3, 14, 15, 9}, {1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
+             [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsing IPs from forwarding headers: [{"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+             [debug] Parsed IPs from forwarding headers: [{3, 14, 15, 9}, {1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
              [debug] {2, 3, 4, 5} is a known proxy IP
              [debug] {10, 0, 0, 1} is a reserved IP
              [debug] {1, 2, 3, 4} is an unknown IP, assuming it's the client
