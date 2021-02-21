@@ -85,13 +85,13 @@ defmodule RemoteIp do
   GitHub.
   """
 
-  @impl true
+  @impl Plug
 
   def init(opts) do
     RemoteIp.Options.pack(opts)
   end
 
-  @impl true
+  @impl Plug
 
   def call(conn, opts) do
     debug :call, [conn] do
