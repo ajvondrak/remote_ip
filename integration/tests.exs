@@ -8,20 +8,18 @@ defmodule Integration.Tests do
   end
 
   def run do
-    {:ok, _} = Agent.start_link(fn -> [] end, name: :summary)
-    File.ls!(@path) |> Enum.each(&run/1)
-    summarize()
+    File.ls!(@path) |> Enum.map(&run/1) |> summarize()
   end
 
   def run(app) do
     IO.puts("---> Running integration tests on #{app} app")
 
-    with :ok <- mix(app, "deps.clean", ["--build", "remote_ip"]),
-         :ok <- mix(app, "deps.get"),
-         :ok <- mix(app, "test", [@color]) do
-      track(app, :pass)
+    with 0 <- mix(app, "deps.clean", ["--build", "remote_ip"]),
+         0 <- mix(app, "deps.get"),
+         0 <- mix(app, "test", [@color]) do
+      {app, :pass}
     else
-      :error -> track(app, :fail)
+      :error -> {app, :fail}
     end
   end
 
@@ -32,32 +30,21 @@ defmodule Integration.Tests do
 
     IO.puts(["-->", "mix" | cmd] |> Enum.join(" "))
     {_, status} = System.cmd("mix", cmd, cd: dir, into: out)
-
-    if status == 0 do
-      :ok
-    else
-      :error
-    end
+    status
   end
 
-  def track(app, flag) do
-    Agent.update(:summary, fn flags -> flags ++ [{app, flag}] end)
-  end
+  def summarize(results) do
+    count(results)
 
-  def summarize do
-    Agent.get(:summary, fn summary ->
-      counts(summary)
-
-      Enum.each(summary, fn
-        {app, :pass} -> pass(app)
-        {app, :fail} -> fail(app)
-      end)
+    Enum.each(results, fn
+      {app, :pass} -> passed(app)
+      {app, :fail} -> failed(app)
     end)
   end
 
-  def counts(summary) do
-    tests = length(summary)
-    fails = Enum.count(summary, fn {_, flag} -> flag == :fail end)
+  def count(results) do
+    tests = length(results)
+    fails = Enum.count(results, fn {_, flag} -> flag == :fail end)
     msg = [plural(tests, "integration test"), ", ", plural(fails, "failure")]
 
     IO.puts("")
@@ -72,11 +59,11 @@ defmodule Integration.Tests do
   def plural(1, string), do: "1 #{string}"
   def plural(n, string), do: "#{n} #{string}s"
 
-  def pass(app) do
+  def passed(app) do
     IO.ANSI.format([:green, "  ✓ #{app}"]) |> IO.puts()
   end
 
-  def fail(app) do
+  def failed(app) do
     IO.ANSI.format([:red, "  ✗ #{app}"]) |> IO.puts()
     System.at_exit(fn _ -> exit({:shutdown, 1}) end)
   end
