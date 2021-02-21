@@ -4,7 +4,7 @@ defmodule RemoteIp.Parser do
 
   `RemoteIp.Headers.parse/1` dynamically dispatches to different parser modules
   depending on the name of the header. For example, the `"forwarded"` header is
-  parsed by `RemoteIp.Headers.Forwarded`, which implements this behaviour.
+  parsed by `RemoteIp.Parsers.Forwarded`, which implements this behaviour.
   """
 
   @typedoc """

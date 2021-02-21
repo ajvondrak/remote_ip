@@ -1,4 +1,4 @@
-defmodule RemoteIp.Headers.Forwarded do
+defmodule RemoteIp.Parsers.Forwarded do
   use Combine
 
   @behaviour RemoteIp.Parser
@@ -12,13 +12,13 @@ defmodule RemoteIp.Headers.Forwarded do
 
   ## Examples
 
-      iex> RemoteIp.Headers.Forwarded.parse("for=1.2.3.4;by=2.3.4.5")
+      iex> RemoteIp.Parsers.Forwarded.parse("for=1.2.3.4;by=2.3.4.5")
       [{1, 2, 3, 4}]
 
-      iex> RemoteIp.Headers.Forwarded.parse("for=\\"[::1]\\", for=\\"[::2]\\"")
+      iex> RemoteIp.Parsers.Forwarded.parse("for=\\"[::1]\\", for=\\"[::2]\\"")
       [{0, 0, 0, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 2}]
 
-      iex> RemoteIp.Headers.Forwarded.parse("invalid")
+      iex> RemoteIp.Parsers.Forwarded.parse("invalid")
       []
   """
 

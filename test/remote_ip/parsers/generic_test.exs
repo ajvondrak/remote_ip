@@ -1,7 +1,7 @@
-defmodule RemoteIp.Headers.GenericTest do
+defmodule RemoteIp.Parsers.GenericTest do
   use ExUnit.Case, async: true
 
-  alias RemoteIp.Headers.Generic
+  alias RemoteIp.Parsers.Generic
 
   doctest Generic
 

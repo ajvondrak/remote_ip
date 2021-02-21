@@ -33,8 +33,8 @@ defmodule RemoteIp.Headers do
   addresses by a module that implements the `RemoteIp.Parser` behaviour. As of
   this writing, there are only two parsers:
 
-  * `"forwarded"` headers are parsed by `RemoteIp.Headers.Forwarded`
-  * all other headers are parsed by `RemoteIp.Headers.Generic`
+  * `"forwarded"` headers are parsed by `RemoteIp.Parsers.Forwarded`
+  * all other headers are parsed by `RemoteIp.Parsers.Generic`
 
   The IPs are concatenated together into a single flat list. Importantly, we
   preserve their relative order. That is, each header produce multiple IPs that
@@ -67,10 +67,10 @@ defmodule RemoteIp.Headers do
   end
 
   defp parse("forwarded", value) do
-    RemoteIp.Headers.Forwarded.parse(value)
+    RemoteIp.Parsers.Forwarded.parse(value)
   end
 
   defp parse(_generic, value) do
-    RemoteIp.Headers.Generic.parse(value)
+    RemoteIp.Parsers.Generic.parse(value)
   end
 end

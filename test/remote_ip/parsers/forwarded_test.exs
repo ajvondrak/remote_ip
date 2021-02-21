@@ -1,7 +1,7 @@
-defmodule RemoteIp.Headers.ForwardedTest do
+defmodule RemoteIp.Parsers.ForwardedTest do
   use ExUnit.Case, async: true
 
-  alias RemoteIp.Headers.Forwarded
+  alias RemoteIp.Parsers.Forwarded
 
   doctest Forwarded
 

@@ -1,4 +1,4 @@
-defmodule RemoteIp.Headers.Generic do
+defmodule RemoteIp.Parsers.Generic do
   @behaviour RemoteIp.Parser
 
   @moduledoc """
@@ -17,13 +17,13 @@ defmodule RemoteIp.Headers.Generic do
 
   ## Examples
 
-      iex> RemoteIp.Headers.Generic.parse("1.2.3.4, 5.6.7.8")
+      iex> RemoteIp.Parsers.Generic.parse("1.2.3.4, 5.6.7.8")
       [{1, 2, 3, 4}, {5, 6, 7, 8}]
 
-      iex> RemoteIp.Headers.Generic.parse("  ::1  ")
+      iex> RemoteIp.Parsers.Generic.parse("  ::1  ")
       [{0, 0, 0, 0, 0, 0, 0, 1}]
 
-      iex> RemoteIp.Headers.Generic.parse("invalid")
+      iex> RemoteIp.Parsers.Generic.parse("invalid")
       []
   """
 
