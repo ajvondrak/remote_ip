@@ -1,14 +1,14 @@
 defmodule RemoteIp.Headers.Forwarded do
   use Combine
 
+  @behaviour RemoteIp.Parser
+
   @moduledoc """
   [RFC 7239](https://tools.ietf.org/html/rfc7239) compliant parser for
   `Forwarded` headers.
-  """
 
-  @doc """
-  Given a `Forwarded` header's string value, parses out IP addresses from the
-  `for=` parameter.
+  This module implements the `RemoteIp.Parser` behaviour. IPs are parsed out of
+  the `for=` pairs across each forwarded element.
 
   ## Examples
 
@@ -22,7 +22,7 @@ defmodule RemoteIp.Headers.Forwarded do
       []
   """
 
-  @spec parse(String.t()) :: [:inet.ip_address()]
+  @impl RemoteIp.Parser
 
   def parse(header) when is_binary(header) do
     case Combine.parse(header, forwarded()) do

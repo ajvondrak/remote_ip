@@ -1,18 +1,19 @@
 defmodule RemoteIp.Headers.Generic do
+  @behaviour RemoteIp.Parser
+
   @moduledoc """
   Generic parser for forwarding headers.
 
-  When there is no other special `RemoteIp.Headers.*` parser submodule,
-  `RemoteIp.Headers.parse/1` will use this module to parse the header value.
-  So, `RemoteIp.Headers.Generic` is used to parse `X-Forwarded-For`,
-  `X-Real-IP`, `X-Client-IP`, and generally unrecognized headers.
-  """
+  This module implements the `RemoteIp.Parser` behaviour. When there is not a
+  more specific parser, `RemoteIp.Headers.parse/1` falls back to using this
+  one.
 
-  @doc """
-  Parses a comma-separated list of IPs.
+  The value is parsed simply as a comma-separated list of IPs. This is suitable
+  for a wide range of headers, such as `X-Forwarded-For"`, `X-Real-IP`, and
+  `X-Client-IP`.
 
   Any amount of whitespace is allowed before and after the commas, as well as
-  at the beginning/end of the input.
+  at the beginning & end of the input.
 
   ## Examples
 
@@ -26,7 +27,7 @@ defmodule RemoteIp.Headers.Generic do
       []
   """
 
-  @spec parse(String.t()) :: [:inet.ip_address()]
+  @impl RemoteIp.Parser
 
   def parse(header) when is_binary(header) do
     header |> split_commas() |> parse_ips()

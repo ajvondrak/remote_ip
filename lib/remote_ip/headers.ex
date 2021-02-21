@@ -20,7 +20,7 @@ defmodule RemoteIp.Headers do
       [{"x-dup", "foo"}, {"x-dup", "bar"}, {"x-dup", "baz"}]
   """
 
-  @spec take(Plug.Conn.headers(), [String.t()]) :: Plug.Conn.headers()
+  @spec take(Plug.Conn.headers(), [binary()]) :: Plug.Conn.headers()
 
   def take(headers, names) do
     Enum.filter(headers, fn {name, _} -> name in names end)
@@ -30,11 +30,11 @@ defmodule RemoteIp.Headers do
   Parses IP addresses out of the given headers.
 
   For each header name/value pair, the value is parsed for zero or more IP
-  addresses by a `RemoteIp.Headers.*` submodule corresponding to the header's
-  name. As of this writing, there are only two cases:
+  addresses by a module that implements the `RemoteIp.Parser` behaviour. As of
+  this writing, there are only two parsers:
 
-  * `"forwarded"` headers are parsed by `RemoteIp.Headers.Forwarded.parse/1`
-  * all other headers are parsed by `RemoteIp.Headers.Generic.parse/1`
+  * `"forwarded"` headers are parsed by `RemoteIp.Headers.Forwarded`
+  * all other headers are parsed by `RemoteIp.Headers.Generic`
 
   The IPs are concatenated together into a single flat list. Importantly, we
   preserve their relative order. That is, each header produce multiple IPs that
@@ -42,7 +42,7 @@ defmodule RemoteIp.Headers do
   multiple headers, the concatenated list maintains the same order as the
   headers appeared in the original name/value list.
 
-  Due to the error-safe nature of the parser submodules, headers that do not
+  Due to the error-safe nature of the parser behaviour, headers that do not
   actually contain valid IP addresses should be safely ignored.
 
   ## Examples
