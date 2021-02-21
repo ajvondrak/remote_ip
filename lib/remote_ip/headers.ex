@@ -30,14 +30,11 @@ defmodule RemoteIp.Headers do
   Parses IP addresses out of the given headers.
 
   For each header name/value pair, the value is parsed for zero or more IP
-  addresses by a module that implements the `RemoteIp.Parser` behaviour. As of
-  this writing, there are only two parsers:
+  addresses by the parser corresponding to the name. If no such parser exists
+  in the given map, we fall back to `RemoteIp.Parsers.Generic`.
 
-  * `"forwarded"` headers are parsed by `RemoteIp.Parsers.Forwarded`
-  * all other headers are parsed by `RemoteIp.Parsers.Generic`
-
-  The IPs are concatenated together into a single flat list. Importantly, we
-  preserve their relative order. That is, each header produce multiple IPs that
+  The IPs are concatenated together into a single flat list. Note that the
+  relative order is preserved. That is, each header produce multiple IPs that
   are kept in the order given by that specific header. Then, in the case of
   multiple headers, the concatenated list maintains the same order as the
   headers appeared in the original name/value list.
@@ -60,17 +57,13 @@ defmodule RemoteIp.Headers do
       [{1, 2, 3, 4}]
   """
 
-  @spec parse(Plug.Conn.headers()) :: [:inet.ip_address()]
+  @spec parse(Plug.Conn.headers(), %{binary() => RemoteIp.Parser.t()}) ::
+          [:inet.ip_address()]
 
-  def parse(headers) do
-    Enum.flat_map(headers, fn {name, value} -> parse(name, value) end)
-  end
-
-  defp parse("forwarded", value) do
-    RemoteIp.Parsers.Forwarded.parse(value)
-  end
-
-  defp parse(_generic, value) do
-    RemoteIp.Parsers.Generic.parse(value)
+  def parse(headers, parsers \\ %{"forwarded" => RemoteIp.Parsers.Forwarded}) do
+    Enum.flat_map(headers, fn {name, value} ->
+      parser = Map.get(parsers, name, RemoteIp.Parsers.Generic)
+      parser.parse(value)
+    end)
   end
 end

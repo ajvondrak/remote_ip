@@ -155,4 +155,29 @@ defmodule RemoteIp.HeadersTest do
 
     assert RemoteIp.Headers.parse(headers) == ips
   end
+
+  defmodule Custom do
+    @behaviour RemoteIp.Parser
+
+    @impl RemoteIp.Parser
+
+    def parse(_) do
+      [{1, 2, 3, 4}]
+    end
+  end
+
+  test "using custom parsers" do
+    headers = [
+      {"x-custom", "parser's gonna parse"},
+      {"x-forwarded-for", "2.3.4.5"},
+      {"forwarded", "for=3.4.5.6"}
+    ]
+
+    ips = [
+      {1, 2, 3, 4},
+      {2, 3, 4, 5}
+    ]
+
+    assert RemoteIp.Headers.parse(headers, %{"x-custom" => Custom}) == ips
+  end
 end
