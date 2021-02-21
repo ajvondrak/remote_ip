@@ -60,7 +60,7 @@ defmodule RemoteIp.Headers do
   @spec parse(Plug.Conn.headers(), %{binary() => RemoteIp.Parser.t()}) ::
           [:inet.ip_address()]
 
-  def parse(headers, parsers \\ %{"forwarded" => RemoteIp.Parsers.Forwarded}) do
+  def parse(headers, parsers \\ RemoteIp.Options.default(:parsers)) do
     Enum.flat_map(headers, fn {name, value} ->
       parser = Map.get(parsers, name, RemoteIp.Parsers.Generic)
       parser.parse(value)

@@ -27,6 +27,7 @@ defmodule RemoteIp.OptionsTest do
       packed = RemoteIp.Options.pack(unknown: :option)
       refute Keyword.has_key?(packed, :unknown)
       assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :proxies)
       assert Keyword.has_key?(packed, :clients)
     end
@@ -42,6 +43,7 @@ defmodule RemoteIp.OptionsTest do
     test ":headers list" do
       packed = RemoteIp.Options.pack(headers: ~w[a b c])
       assert packed[:headers] == ~w[a b c]
+      assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :proxies)
       assert Keyword.has_key?(packed, :clients)
     end
@@ -49,6 +51,33 @@ defmodule RemoteIp.OptionsTest do
     test ":headers mfa" do
       packed = RemoteIp.Options.pack(headers: {MFA, :get, [:headers]})
       assert packed[:headers] == {MFA, :get, [:headers]}
+      assert Keyword.has_key?(packed, :parsers)
+      assert Keyword.has_key?(packed, :proxies)
+      assert Keyword.has_key?(packed, :clients)
+    end
+
+    test ":parsers map" do
+      packed = RemoteIp.Options.pack(parsers: %{"foo" => Bar})
+      assert is_map(packed[:parsers])
+      assert packed[:parsers]["foo"] == Bar
+      assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :proxies)
+      assert Keyword.has_key?(packed, :clients)
+    end
+
+    test ":parsers default" do
+      packed = RemoteIp.Options.pack([])
+      assert is_map(packed[:parsers])
+      assert packed[:parsers]["forwarded"] == RemoteIp.Parsers.Forwarded
+      assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :proxies)
+      assert Keyword.has_key?(packed, :clients)
+    end
+
+    test ":parsers mfa" do
+      packed = RemoteIp.Options.pack(parsers: {MFA, :get, [:parsers]})
+      assert packed[:parsers] == {MFA, :get, [:parsers]}
+      assert Keyword.has_key?(packed, :headers)
       assert Keyword.has_key?(packed, :proxies)
       assert Keyword.has_key?(packed, :clients)
     end
@@ -57,6 +86,7 @@ defmodule RemoteIp.OptionsTest do
       packed = RemoteIp.Options.pack([])
       assert packed[:proxies] == []
       assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :clients)
     end
 
@@ -64,6 +94,7 @@ defmodule RemoteIp.OptionsTest do
       packed = RemoteIp.Options.pack(proxies: ~w[123.0.0.0/8])
       assert packed[:proxies] == [{{123, 0, 0, 0}, {123, 255, 255, 255}, 8}]
       assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :clients)
     end
 
@@ -71,6 +102,7 @@ defmodule RemoteIp.OptionsTest do
       packed = RemoteIp.Options.pack(proxies: {MFA, :get, [:proxies]})
       assert packed[:proxies] == {MFA, :get, [:proxies]}
       assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :clients)
     end
 
@@ -78,6 +110,7 @@ defmodule RemoteIp.OptionsTest do
       packed = RemoteIp.Options.pack([])
       assert packed[:clients] == []
       assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :proxies)
     end
 
@@ -85,6 +118,7 @@ defmodule RemoteIp.OptionsTest do
       packed = RemoteIp.Options.pack(clients: ~w[234.0.0.0/8])
       assert packed[:clients] == [{{234, 0, 0, 0}, {234, 255, 255, 255}, 8}]
       assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :proxies)
     end
 
@@ -92,6 +126,7 @@ defmodule RemoteIp.OptionsTest do
       packed = RemoteIp.Options.pack(clients: {MFA, :get, [:clients]})
       assert packed[:clients] == {MFA, :get, [:clients]}
       assert Keyword.has_key?(packed, :headers)
+      assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :proxies)
     end
   end
@@ -119,6 +154,33 @@ defmodule RemoteIp.OptionsTest do
       MFA.put(:headers, ~w[d e f])
       unpacked = RemoteIp.Options.unpack(packed)
       assert unpacked[:headers] == ~w[d e f]
+    end
+
+    test ":parsers default" do
+      packed = RemoteIp.Options.pack([])
+      unpacked = RemoteIp.Options.unpack(packed)
+      assert unpacked[:parsers] == packed[:parsers]
+    end
+
+    test ":parsers map" do
+      packed = RemoteIp.Options.pack(parsers: %{"foo" => Bar})
+      unpacked = RemoteIp.Options.unpack(packed)
+      parsers = %{"forwarded" => RemoteIp.Parsers.Forwarded, "foo" => Bar}
+      assert unpacked[:parsers] == parsers
+    end
+
+    test ":parsers mfa" do
+      packed = RemoteIp.Options.pack(parsers: {MFA, :get, [:parsers]})
+
+      MFA.put(:parsers, %{"foo" => Bar})
+      unpacked = RemoteIp.Options.unpack(packed)
+      parsers = %{"forwarded" => RemoteIp.Parsers.Forwarded, "foo" => Bar}
+      assert unpacked[:parsers] == parsers
+
+      MFA.put(:parsers, %{"bar" => Baz})
+      unpacked = RemoteIp.Options.unpack(packed)
+      parsers = %{"forwarded" => RemoteIp.Parsers.Forwarded, "bar" => Baz}
+      assert unpacked[:parsers] == parsers
     end
 
     test ":proxies default" do

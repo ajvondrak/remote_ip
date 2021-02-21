@@ -3,12 +3,14 @@ defmodule RemoteIp.Options do
   @moduledoc false
 
   def default(:headers), do: ~w[forwarded x-forwarded-for x-client-ip x-real-ip]
+  def default(:parsers), do: %{"forwarded" => RemoteIp.Parsers.Forwarded}
   def default(:proxies), do: []
   def default(:clients), do: []
 
   def pack(options) do
     [
       headers: pack(options, :headers),
+      parsers: pack(options, :parsers),
       proxies: pack(options, :proxies),
       clients: pack(options, :clients)
     ]
@@ -24,6 +26,7 @@ defmodule RemoteIp.Options do
   def unpack(options) do
     [
       headers: unpack(options, :headers),
+      parsers: unpack(options, :parsers),
       proxies: unpack(options, :proxies),
       clients: unpack(options, :clients)
     ]
@@ -37,6 +40,7 @@ defmodule RemoteIp.Options do
   end
 
   defp evaluate(:headers, headers), do: headers
+  defp evaluate(:parsers, parsers), do: Map.merge(default(:parsers), parsers)
   defp evaluate(:proxies, proxies), do: proxies |> Enum.map(&InetCidr.parse/1)
   defp evaluate(:clients, clients), do: clients |> Enum.map(&InetCidr.parse/1)
 end
