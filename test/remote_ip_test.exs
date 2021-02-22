@@ -475,10 +475,84 @@ defmodule RemoteIpTest do
     end
   end
 
+  defmodule ParserA do
+    @behaviour RemoteIp.Parser
+    @impl RemoteIp.Parser
+    def parse(value) do
+      ips = RemoteIp.Parsers.Generic.parse(value)
+      ips |> Enum.map(fn {a, b, c, d} -> {10 + a, 10 + b, 10 + c, 10 + d} end)
+    end
+  end
+
+  defmodule ParserB do
+    @behaviour RemoteIp.Parser
+    @impl RemoteIp.Parser
+    def parse(value) do
+      ips = RemoteIp.Parsers.Generic.parse(value)
+      ips |> Enum.map(fn {a, b, c, d} -> {20 + a, 20 + b, 20 + c, 20 + d} end)
+    end
+  end
+
+  defmodule ParserC do
+    @behaviour RemoteIp.Parser
+    @impl RemoteIp.Parser
+    def parse(value) do
+      ips = RemoteIp.Parsers.Generic.parse(value)
+      ips |> Enum.map(fn {a, b, c, d} -> {30 + a, 30 + b, 30 + c, 30 + d} end)
+    end
+  end
+
+  describe ":parsers option" do
+    test "can customize parsers for specific headers" do
+      headers = [{"a", "1.2.3.4"}, {"b", "2.3.4.5"}, {"c", "3.4.5.6"}]
+      parsers = %{"a" => ParserA, "b" => ParserB, "c" => ParserC}
+
+      assert RemoteIp.from(headers, parsers: parsers, headers: ~w[a]) == {11, 12, 13, 14}
+      assert RemoteIp.from(headers, parsers: parsers, headers: ~w[b]) == {22, 23, 24, 25}
+      assert RemoteIp.from(headers, parsers: parsers, headers: ~w[c]) == {33, 34, 35, 36}
+    end
+
+    test "doesn't clobber generic parser on other headers" do
+      headers = [{"a", "1.2.3.4"}, {"b", "2.3.4.5"}, {"c", "3.4.5.6"}]
+      parsers = %{"a" => ParserA, "c" => ParserC}
+
+      assert RemoteIp.from(headers, parsers: parsers, headers: ~w[a]) == {11, 12, 13, 14}
+      assert RemoteIp.from(headers, parsers: parsers, headers: ~w[b]) == {2, 3, 4, 5}
+      assert RemoteIp.from(headers, parsers: parsers, headers: ~w[c]) == {33, 34, 35, 36}
+    end
+
+    test "doesn't clobber Forwarded parser by default" do
+      headers = [{"forwarded", "for=1.2.3.4"}]
+      parsers = %{"a" => ParserA, "b" => ParserB, "c" => ParserC}
+      options = [parsers: parsers, headers: ~w[forwarded a b c]]
+      assert RemoteIp.from(headers, options) == {1, 2, 3, 4}
+    end
+
+    test "can clobber Forwarded parser" do
+      headers = [{"forwarded", "1.2.3.4"}]
+      parsers = %{"forwarded" => ParserA}
+      options = [parsers: parsers, headers: ~w[forwarded]]
+      assert RemoteIp.from(headers, options) == {11, 12, 13, 14}
+    end
+
+    test "can be an MFA" do
+      headers = [{"x", "1.2.3.4"}]
+      parsers = {Application, :get_env, [:remote_ip_test, :parsers]}
+      options = [parsers: parsers, headers: ~w[x]]
+
+      Application.put_env(:remote_ip_test, :parsers, %{"x" => ParserA})
+      assert RemoteIp.from(headers, options) == {11, 12, 13, 14}
+
+      Application.put_env(:remote_ip_test, :parsers, %{"x" => ParserC})
+      assert RemoteIp.from(headers, options) == {31, 32, 33, 34}
+    end
+  end
+
   defmodule App do
     use Plug.Router
 
     plug RemoteIp,
+      parsers: {__MODULE__, :parsers, []},
       headers: {__MODULE__, :config, ["HEADERS"]},
       proxies: {__MODULE__, :config, ["PROXIES"]},
       clients: {__MODULE__, :config, ["CLIENTS"]}
@@ -493,6 +567,13 @@ defmodule RemoteIpTest do
     def config(var) do
       System.get_env() |> Map.get(var, "") |> String.split(",", trim: true)
     end
+
+    def parsers do
+      Enum.into(config("PARSERS"), %{}, fn spec ->
+        [header, parser] = String.split(spec, ":")
+        {header, :"Elixir.RemoteIpTest.#{parser}"}
+      end)
+    end
   end
 
   test "runtime configuration" do
@@ -505,6 +586,17 @@ defmodule RemoteIpTest do
 
       System.put_env("HEADERS", "a")
       assert App.call(conn, App.init([])).resp_body == "2.3.4.5"
+
+      System.put_env("PARSERS", "a:ParserA")
+      assert App.call(conn, App.init([])).resp_body == "12.13.14.15"
+
+      System.put_env("PARSERS", "a:ParserB,c:ParserC")
+      assert App.call(conn, App.init([])).resp_body == "22.23.24.25"
+
+      System.put_env("PROXIES", "22.0.0.0/8,212.188.0.0/16")
+      assert App.call(conn, App.init([])).resp_body == "21.22.23.24"
+
+      System.delete_env("PARSERS")
 
       System.put_env("PROXIES", "2.1.0.0/16,2.2.0.0/16,2.3.0.0/16")
       assert App.call(conn, App.init([])).resp_body == "1.2.3.4"
@@ -521,6 +613,7 @@ defmodule RemoteIpTest do
       System.put_env("CLIENTS", "4.5.7.0/24")
       assert App.call(conn, App.init([])).resp_body == "3.4.5.6"
     after
+      System.delete_env("PARSERS")
       System.delete_env("HEADERS")
       System.delete_env("PROXIES")
       System.delete_env("CLIENTS")

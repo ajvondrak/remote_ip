@@ -160,7 +160,7 @@ defmodule RemoteIp do
   defp ips_from(headers, opts) do
     debug :ips do
       headers = forwarding_from(headers, opts)
-      RemoteIp.Headers.parse(headers)
+      RemoteIp.Headers.parse(headers, opts[:parsers])
     end
   end
 
