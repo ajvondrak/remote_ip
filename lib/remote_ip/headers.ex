@@ -57,8 +57,9 @@ defmodule RemoteIp.Headers do
       [{1, 2, 3, 4}]
   """
 
-  @spec parse(Plug.Conn.headers(), %{binary() => RemoteIp.Parser.t()}) ::
-          [:inet.ip_address()]
+  @spec parse(Plug.Conn.headers(), %{binary() => RemoteIp.Parser.t()}) :: [
+          :inet.ip_address()
+        ]
 
   def parse(headers, parsers \\ RemoteIp.Options.default(:parsers)) do
     Enum.flat_map(headers, fn {name, value} ->
