@@ -33,6 +33,7 @@ defmodule DebugTest do
       assert capture_log(fn -> call(opts) end) == """
              [debug] Processing remote IP
                headers: ["xff"]
+               parsers: %{"forwarded" => RemoteIp.Parsers.Forwarded}
                proxies: ["1.2.0.0/16", "2.3.4.5/32"]
                clients: []
              [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
@@ -55,6 +56,7 @@ defmodule DebugTest do
       assert capture_log(fn -> call(opts) end) == """
              [debug] Processing remote IP
                headers: ["xff"]
+               parsers: %{"forwarded" => RemoteIp.Parsers.Forwarded}
                proxies: ["1.2.0.0/16", "2.3.4.5/32"]
                clients: ["1.2.3.4/32"]
              [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
@@ -77,6 +79,7 @@ defmodule DebugTest do
       assert capture_log(fn -> call(opts) end) == """
              [debug] Processing remote IP
                headers: ["xff"]
+               parsers: %{"forwarded" => RemoteIp.Parsers.Forwarded}
                proxies: ["2.3.4.5/32"]
                clients: []
              [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
@@ -101,6 +104,7 @@ defmodule DebugTest do
       assert capture_log(fn -> from(opts) end) == """
              [debug] Processing remote IP
                headers: []
+               parsers: %{"forwarded" => RemoteIp.Parsers.Forwarded}
                proxies: ["1.2.0.0/16", "2.3.4.5/32"]
                clients: ["1.0.0.0/8", "2.0.0.0/8", "3.0.0.0/8"]
              [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
@@ -120,6 +124,7 @@ defmodule DebugTest do
       assert capture_log(fn -> from(opts) end) == """
              [debug] Processing remote IP
                headers: ["x-forwarded-for"]
+               parsers: %{"forwarded" => RemoteIp.Parsers.Forwarded}
                proxies: ["1.2.0.0/16", "2.3.4.5/32"]
                clients: ["3.0.0.0/8"]
              [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
@@ -140,6 +145,7 @@ defmodule DebugTest do
       assert capture_log(fn -> from(opts) end) == """
              [debug] Processing remote IP
                headers: ["x-forwarded-for", "xff"]
+               parsers: %{"forwarded" => RemoteIp.Parsers.Forwarded}
                proxies: ["2.3.4.5/32", "3.0.0.0/8"]
                clients: []
              [debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "3.14.15.9"}, {"xff", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
