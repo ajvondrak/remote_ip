@@ -19,7 +19,7 @@ defmodule Integration.Tests do
          0 <- mix(app, "test", [@color]) do
       {app, :pass}
     else
-      :error -> {app, :fail}
+      _ -> {app, :fail}
     end
   end
 
