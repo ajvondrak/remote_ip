@@ -4,85 +4,152 @@ defmodule RemoteIp do
   @behaviour Plug
 
   @moduledoc """
-  A plug to overwrite the `Plug.Conn`'s `remote_ip` based on request headers.
+  A plug to rewrite the `Plug.Conn`'s `remote_ip` based on forwarding headers.
 
-  To use, add the `RemoteIp` plug to your app's plug pipeline:
+  Generic comma-separated headers like `X-Forwarded-For`, `X-Real-Ip`, and
+  `X-Client-Ip` are all recognized, as well as the [RFC
+  7239](https://tools.ietf.org/html/rfc7239) `Forwarded` header. IPs are
+  processed last-to-first to prevent IP spoofing. Read more in the [algorithm
+  documentation](#algorithm).
+
+  This plug is highly configurable, giving you the power to adapt it to your
+  particular networking infrastructure:
+
+  * IPs can come from any header(s) you want. You can even implement your own
+    custom parser if you're using a special format.
+
+  * You can configure the IPs of known proxies & clients so that you never get
+    the wrong results.
+
+  * All options are configurable at runtime, so you can deploy a single release
+    but still customize it using environment variables, the `Application`
+    environment, or any other arbitrary mechanism.
+
+  * Still not getting the right IP? You can recompile the plug with debugging
+    enabled to generate logs, and even fine-tune the verbosity by selecting
+    which events to track.
+
+  ## Usage
+
+  This plug should be early in your pipeline, or else the `remote_ip` might not
+  get rewritten before your route's logic executes.
+
+  In [Phoenix](https://hexdocs.pm/phoenix), this might mean plugging `RemoteIp`
+  into your endpoint before the router:
 
   ```elixir
-  defmodule MyApp do
-    use Plug.Builder
+  defmodule MyApp.Endpoint do
+    use Phoenix.Endpoint, otp_app: :my_app
 
     plug RemoteIp
+    # plug ...
+    # plug ...
+    plug MyApp.Router
   end
   ```
 
-  Keep in mind the order of plugs in your pipeline and place `RemoteIp` as
-  early as possible. For example, if you were to add `RemoteIp` *after* [the
-  Plug Router](https://github.com/elixir-lang/plug#the-plug-router), your route
-  action's logic would be executed *before* the `remote_ip` actually gets
-  modified - not very useful!
+  But if you only want to rewrite IPs in a narrower part of your app, you could
+  of course put it in an individual pipeline of your router.
 
-  There are 3 options that can be passed in:
-
-  * `:headers` - A list of strings naming the `req_headers` to use when
-    deriving the `remote_ip`. Order does not matter. Defaults to `~w[forwarded
-    x-forwarded-for x-client-ip x-real-ip]`.
-
-  * `:proxies` - A list of strings in
-    [CIDR](https://en.wikipedia.org/wiki/CIDR) notation specifying the IPs of
-    known proxies. Defaults to `[]`.
-
-      [Loopback](https://en.wikipedia.org/wiki/Loopback) and
-      [private](https://en.wikipedia.org/wiki/Private_network) IPs are always
-      appended to this list:
-
-      * 127.0.0.0/8
-      * ::1/128
-      * fc00::/7
-      * 10.0.0.0/8
-      * 172.16.0.0/12
-      * 192.168.0.0/16
-
-      Since these IPs are internal, they often are not the actual client
-      address in production, so we add them by default. To override this
-      behavior, whitelist known client IPs using the `:clients` option.
-
-  * `:clients` - A list of strings in
-    [CIDR](https://en.wikipedia.org/wiki/CIDR) notation specifying the IPs of
-    known clients. Defaults to `[]`.
-
-      An IP in any of the ranges listed here will never be considered a proxy.
-      This takes precedence over the `:proxies` option, including
-      loopback/private addresses. Any IP that is **not** covered by `:clients`
-      or `:proxies` is assumed to be a client IP.
-
-  For example, suppose you know:
-  * you are behind proxies in the 1.2.x.x block
-  * the proxies use the `X-Foo`, `X-Bar`, and `X-Baz` headers
-  * but the IP 1.2.3.4 is actually a client, not one of the proxies
-
-  Then you could say
+  In an ordinary `Plug.Router`, you should make sure `RemoteIp` comes before
+  the `:match`/`:dispatch` plugs:
 
   ```elixir
   defmodule MyApp do
-    use Plug.Builder
+    use Plug.Router
 
-    plug RemoteIp,
-         headers: ~w[x-foo x-bar x-baz],
-         proxies: ~w[1.2.0.0/16],
-         clients: ~w[1.2.3.4/32]
+    plug RemoteIp
+    plug :match
+    plug :dispatch
+
+    # get "/" do ...
   end
   ```
 
-  Note that, due to limitations in the
-  [inet_cidr](https://github.com/Cobenian/inet_cidr) library used to parse
-  them, `:proxies` and `:clients` **must** be written in full CIDR notation,
-  even if specifying just a single IP. So instead of `"127.0.0.1"` and
-  `"a:b::c:d"`, you would use `"127.0.0.1/32"` and `"a:b::c:d/128"`.
+  You can also use `RemoteIp.from/2` to determine an IP from a list of headers.
+  This is useful outside of the plug pipeline, where you may not have access to
+  the `Plug.Conn`. For example, you might only be getting the `x_headers` from
+  [`Phoenix.Socket`](https://hexdocs.pm/phoenix/Phoenix.Socket.html):
 
-  For more details, refer to the
-  [README](https://github.com/ajvondrak/remote_ip/blob/master/README.md) on
-  GitHub.
+  ```elixir
+  defmodule MySocket do
+    use Phoenix.Socket
+
+    def connect(params, socket, connect_info) do
+      ip = RemoteIp.from(connect_info[:x_headers])
+      # ...
+    end
+  end
+  ```
+
+  ## Configuration
+
+  Options may be passed into `RemoteIp` (and `RemoteIp.from/2`) as a keyword
+  list. At a high level, the following options are available:
+
+  * `:headers` - a list of header names to consider
+  * `:parsers` - a map from header names to custom parser modules
+  * `:clients` - a list of known client IPs in CIDR notation
+  * `:proxies` - a list of known proxy IPs in CIDR notation
+
+  You can specify any option using a tuple of `{module, function_name,
+  arguments}`, which will be called dynamically at runtime to get the
+  equivalent value.
+
+  For more details about these options, see `RemoteIp.Options`.
+
+  ## Troubleshooting
+
+  Getting the right configuration can be tricky. Requests might come in with
+  unexpected headers, or maybe you didn't account for certain proxies, or any
+  number of other issues.
+
+  Luckily, you can debug `RemoteIp` (and `RemoteIp.from/2`) by updating your
+  `Config` file:
+
+  ```elixir
+  config :remote_ip, debug: true
+  ```
+
+  and recompiling the `:remote_ip` dependency:
+
+  ```console
+  $ mix deps.clean --build remote_ip
+  $ mix deps.compile
+  ```
+
+  Then it will generate log messages showing how the IP gets computed. For more
+  details about these messages, as well advanced usage, see
+  `RemoteIp.Debugger`.
+
+  ## Metadata
+
+  When you use this plug, it will populate the `Logger` metadata under the key
+  `:remote_ip`. This will be the string representation of the final value of
+  the `Plug.Conn`'s `remote_ip`. Even if no client was found in the headers, we
+  still set the metadata to the original IP.
+
+  You can use this in your logs by updating your `Config` file:
+
+  ```elixir
+  config :logger,
+    message: "$metadata[$level] $message\\n",
+    metadata: [:remote_ip]
+  ```
+
+  Then your logs will look something like this:
+
+  ```log
+  [info] Running ExampleWeb.Endpoint with cowboy 2.8.0 at 0.0.0.0:4000 (http)
+  [info] Access ExampleWeb.Endpoint at http://localhost:4000
+  remote_ip=1.2.3.4 [info] GET /
+  remote_ip=1.2.3.4 [debug] Processing with ExampleWeb.PageController.index/2
+    Parameters: %{}
+    Pipelines: [:browser]
+  remote_ip=1.2.3.4 [info] Sent 200 in 21ms
+  ```
+
+  Note that metadata will *not* be set by `RemoteIp.from/2`.
   """
 
   @impl Plug
@@ -102,23 +169,17 @@ defmodule RemoteIp do
   end
 
   @doc """
-  Standalone function to extract the remote IP from a list of headers.
+  Extracts the remote IP from a list of headers.
 
-  It's possible to get a subset of headers without access to a full `Plug.Conn`
-  struct. For instance, when [using Phoenix
-  sockets](https://hexdocs.pm/phoenix/Phoenix.Endpoint.html), your socket's
-  `connect/3` callback may only be receiving `:x_headers` in the
-  `connect_info`. Such situations make it inconvenient to use `RemoteIp`
-  outside of a plug pipeline.
+  In cases where you don't have access to a full `Plug.Conn` struct, you can
+  use this function to process the remote IP from a list of key-value pairs
+  representing the headers.
 
-  Therefore, this function will fetch the remote IP from a plain list of header
-  key-value pairs (just as you'd have in the `req_headers` of a `Plug.Conn`).
-  You may optionally specify the same options as if you were using `RemoteIp`
-  as a plug: they'll be processed by `RemoteIp.init/1` each time you call this
-  function.
+  You may specify the same options as if you were using the plug. See
+  `RemoteIp.Options` for details.
 
-  If a remote IP cannot be parsed from the given headers (e.g., if the list is
-  empty), this function will return `nil`.
+  If no client IP can be found in the given headers, this function will return
+  `nil`.
 
   ## Examples
 
