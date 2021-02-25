@@ -19,7 +19,7 @@ defmodule PurgeTest do
   end
 
   test "logs get purged at compile time" do
-    Logger.configure(level: :info)
+    Logger.configure(level: :debug)
     assert capture_log(fn -> call(@conn) end) == ""
     assert capture_log(fn -> from(@head) end) == ""
   end

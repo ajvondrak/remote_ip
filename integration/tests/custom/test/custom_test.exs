@@ -22,29 +22,29 @@ defmodule CustomTest do
 
   test "hit with RemoteIp.call/2" do
     assert capture_log(fn -> call(@conn) end) == """
-           [info] Parsed IPs from forwarding headers: [{3, 14, 15, 9}, {26, 53, 58, 97}, {93, 238, 46, 26}]
-           [info] Processed remote IP, found client {93, 238, 46, 26} to replace {127, 0, 0, 1}
+           [debug] Parsed IPs from forwarding headers: [{3, 14, 15, 9}, {26, 53, 58, 97}, {93, 238, 46, 26}]
+           [debug] Processed remote IP, found client {93, 238, 46, 26} to replace {127, 0, 0, 1}
            """
   end
 
   test "miss with RemoteIp.call/2" do
     assert capture_log(fn -> call(@conn, headers: []) end) == """
-           [info] Parsed IPs from forwarding headers: []
-           [info] Processed remote IP, no client found to replace {127, 0, 0, 1}
+           [debug] Parsed IPs from forwarding headers: []
+           [debug] Processed remote IP, no client found to replace {127, 0, 0, 1}
            """
   end
 
   test "hit with RemoteIp.from/2" do
     assert capture_log(fn -> from(@head) end) == """
-           [info] Parsed IPs from forwarding headers: [{3, 14, 15, 9}, {26, 53, 58, 97}, {93, 238, 46, 26}]
-           [info] Processed remote IP, found client {93, 238, 46, 26}
+           [debug] Parsed IPs from forwarding headers: [{3, 14, 15, 9}, {26, 53, 58, 97}, {93, 238, 46, 26}]
+           [debug] Processed remote IP, found client {93, 238, 46, 26}
            """
   end
 
   test "miss with RemoteIp.from/2" do
     assert capture_log(fn -> from(@head, headers: []) end) == """
-           [info] Parsed IPs from forwarding headers: []
-           [info] Processed remote IP, no client found
+           [debug] Parsed IPs from forwarding headers: []
+           [debug] Processed remote IP, no client found
            """
   end
 end

@@ -1,13 +1,8 @@
 defmodule RemoteIp.Debugger do
+  require Logger
+
   # TODO
   @moduledoc false
-
-  defmacro __using__(_) do
-    quote do
-      require Logger
-      import unquote(__MODULE__)
-    end
-  end
 
   defmacro debug(id, inputs \\ [], do: output) do
     if debug?(id) do
@@ -32,19 +27,8 @@ defmodule RemoteIp.Debugger do
       defp debug?(_), do: @debug
   end
 
-  @level Application.get_env(:remote_ip, :level, :debug)
-
-  defmacro __log__(id, inputs, output) do
-    quote do
-      Logger.log(
-        unquote(@level),
-        unquote(__MODULE__).__message__(
-          unquote(id),
-          unquote(inputs),
-          unquote(output)
-        )
-      )
-    end
+  def __log__(id, inputs, output) do
+    Logger.debug(__message__(id, inputs, output))
   end
 
   def __message__(:options, [], options) do

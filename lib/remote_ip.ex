@@ -1,5 +1,5 @@
 defmodule RemoteIp do
-  use RemoteIp.Debugger
+  import RemoteIp.Debugger
 
   @behaviour Plug
 
