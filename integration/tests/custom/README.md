@@ -5,5 +5,5 @@ This app customizes the subset of debug messages it wants remote\_ip to actually
 This doesn't enumerate all the possible customizations or anything, but it does provide a smoke test for a reasonably useful configuration you could imagine in an actual app. Here, we log the parsed IPs and the ultimate remote IP at the `:info` level.
 
 ```elixir
-config :remote_ip, debug: [:ips, :call, :from], level: :info
+config :remote_ip, debug: [:ips, :ip], level: :info
 ```

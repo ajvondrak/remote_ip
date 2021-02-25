@@ -5,4 +5,4 @@ config :logger, :console,
   colors: [enabled: false],
   format: "[$level] $message\n"
 
-config :remote_ip, debug: [:ips, :call, :from], level: :info
+config :remote_ip, debug: [:ips, :ip], level: :info

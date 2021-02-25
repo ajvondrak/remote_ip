@@ -94,7 +94,7 @@ defmodule RemoteIp do
   @impl Plug
 
   def call(conn, opts) do
-    debug :call, [conn] do
+    debug :ip, [conn] do
       ip = ip_from(conn.req_headers, opts) || conn.remote_ip
       add_metadata(ip)
       %{conn | remote_ip: ip}
@@ -141,7 +141,7 @@ defmodule RemoteIp do
   @spec from(Plug.Conn.headers(), keyword()) :: :inet.ip_address() | nil
 
   def from(headers, opts \\ []) do
-    debug :from do
+    debug :ip do
       ip_from(headers, init(opts))
     end
   end

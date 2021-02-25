@@ -83,9 +83,9 @@ defmodule RemoteIp.Debugger do
     end
   end
 
-  def __message__(:call, [old], new) do
-    origin = inspect(old.remote_ip)
-    client = inspect(new.remote_ip)
+  def __message__(:ip, [old_conn], new_conn) do
+    origin = inspect(old_conn.remote_ip)
+    client = inspect(new_conn.remote_ip)
 
     if client != origin do
       "Processed remote IP, found client #{client} to replace #{origin}"
@@ -94,7 +94,7 @@ defmodule RemoteIp.Debugger do
     end
   end
 
-  def __message__(:from, [], ip) do
+  def __message__(:ip, [], ip) do
     if ip == nil do
       "Processed remote IP, no client found"
     else
