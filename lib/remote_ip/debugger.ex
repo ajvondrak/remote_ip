@@ -12,10 +12,8 @@ defmodule RemoteIp.Debugger do
 
   ## Basic usage
 
-  Events are generated whenever (a) the `RemoteIp` plug processes a
-  `Plug.Conn`, or (b) you call `RemoteIp.from/2`.
-
-  To enable or disable all debug events at once, you can set a boolean in your
+  Events are fired on every call to `RemoteIp.call/2` or `RemoteIp.from/2`. To
+  enable or disable all debug events at once, you can set a boolean in your
   `Config` file:
 
   ```elixir

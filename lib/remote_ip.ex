@@ -84,8 +84,8 @@ defmodule RemoteIp do
 
   ## Configuration
 
-  Options may be passed into `RemoteIp` (and `RemoteIp.from/2`) as a keyword
-  list. At a high level, the following options are available:
+  Options may be passed as a keyword list via `RemoteIp.init/1` or directly
+  into `RemoteIp.from/2`. At a high level, the following options are available:
 
   * `:headers` - a list of header names to consider
   * `:parsers` - a map from header names to custom parser modules
@@ -104,8 +104,8 @@ defmodule RemoteIp do
   unexpected headers, or maybe you didn't account for certain proxies, or any
   number of other issues.
 
-  Luckily, you can debug `RemoteIp` (and `RemoteIp.from/2`) by updating your
-  `Config` file:
+  Luckily, you can debug `RemoteIp.call/2` and `RemoteIp.from/2` by updating
+  your `Config` file:
 
   ```elixir
   config :remote_ip, debug: true
@@ -124,10 +124,10 @@ defmodule RemoteIp do
 
   ## Metadata
 
-  When you use this plug, it will populate the `Logger` metadata under the key
-  `:remote_ip`. This will be the string representation of the final value of
-  the `Plug.Conn`'s `remote_ip`. Even if no client was found in the headers, we
-  still set the metadata to the original IP.
+  When you use this plug, `RemoteIp.call/2` will populate the `Logger` metadata
+  under the key `:remote_ip`. This will be the string representation of the
+  final value of the `Plug.Conn`'s `remote_ip`. Even if no client was found in
+  the headers, we still set the metadata to the original IP.
 
   You can use this in your logs by updating your `Config` file:
 
@@ -154,11 +154,27 @@ defmodule RemoteIp do
 
   @impl Plug
 
+  @doc """
+  The `c:Plug.init/1` callback.
+
+  This accepts the keyword options described by `RemoteIp.Options`. Because
+  plug initialization typically happens at compile time, we make sure not to
+  evaluate runtime options until `call/2`.
+  """
+
   def init(opts) do
     RemoteIp.Options.pack(opts)
   end
 
   @impl Plug
+
+  @doc """
+  The `c:Plug.call/2` callback.
+
+  Rewrites the `Plug.Conn`'s `remote_ip` based on its forwarding headers. Each
+  call will re-evaluate all runtime options. See `RemoteIp.Options` for
+  details.
+  """
 
   def call(conn, opts) do
     debug :ip, [conn] do
@@ -175,7 +191,8 @@ defmodule RemoteIp do
   use this function to process the remote IP from a list of key-value pairs
   representing the headers.
 
-  You may specify the same options as if you were using the plug. See
+  You may specify the same options as if you were using the plug. Runtime
+  options are evaluated each time you call this function. See
   `RemoteIp.Options` for details.
 
   If no client IP can be found in the given headers, this function will return
