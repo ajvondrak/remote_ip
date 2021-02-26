@@ -9,7 +9,7 @@ defmodule RemoteIp.Parsers.Generic do
   one.
 
   The value is parsed simply as a comma-separated list of IPs. This is suitable
-  for a wide range of headers, such as `X-Forwarded-For"`, `X-Real-IP`, and
+  for a wide range of headers, such as `X-Forwarded-For`, `X-Real-IP`, and
   `X-Client-IP`.
 
   Any amount of whitespace is allowed before and after the commas, as well as
