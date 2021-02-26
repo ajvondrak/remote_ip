@@ -39,8 +39,8 @@ defmodule RemoteIp.Headers do
   multiple headers, the concatenated list maintains the same order as the
   headers appeared in the original name/value list.
 
-  Due to the error-safe nature of the parser behaviour, headers that do not
-  actually contain valid IP addresses should be safely ignored.
+  Due to the error-safe nature of the `RemoteIp.Parser` behaviour, headers that
+  do not actually contain valid IP addresses should be safely ignored.
 
   ## Examples
 
