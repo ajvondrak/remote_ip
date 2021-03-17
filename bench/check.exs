@@ -25,11 +25,16 @@ suite = %{
       Enum.each(blocks[:inet_cidr], &InetCidr.contains?(&1, ip))
     end)
   end,
-  cider: fn ips ->
-    Enum.each(ips, fn ip ->
-      Enum.each(blocks[:cider], &Cider.contains?(ip, &1))
-    end)
-  end,
+  cider: {
+    fn ips ->
+      Enum.each(ips, fn ip ->
+        Enum.each(blocks[:cider], &Cider.contains?(ip, &1))
+      end)
+    end,
+    before_scenario: fn ips ->
+      Enum.map(ips, &Cider.ip!/1)
+    end,
+  },
   cidr: fn ips ->
     Enum.each(ips, fn ip ->
       Enum.each(blocks[:cidr], &CIDR.match(&1, ip))
