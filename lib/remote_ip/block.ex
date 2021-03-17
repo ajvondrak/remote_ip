@@ -4,7 +4,7 @@ defmodule RemoteIp.Block do
 
   @moduledoc false
 
-  defstruct [:ip, :mask]
+  defstruct [:net, :mask]
 
   def encode({a, b, c, d}) do
     <<a::8, b::8, c::8, d::8>>
@@ -18,12 +18,12 @@ defmodule RemoteIp.Block do
     contains?(block, encode(ip))
   end
 
-  def contains?(%Block{ip: <<sup::32>>, mask: <<mask::32>>}, <<sub::32>>) do
-    (sup &&& mask) == (sub &&& mask)
+  def contains?(%Block{net: <<net::32>>, mask: <<mask::32>>}, <<ip::32>>) do
+    (ip &&& mask) == net
   end
 
-  def contains?(%Block{ip: <<sup::128>>, mask: <<mask::128>>}, <<sub::128>>) do
-    (sup &&& mask) == (sub &&& mask)
+  def contains?(%Block{net: <<net::128>>, mask: <<mask::128>>}, <<ip::128>>) do
+    (ip &&& mask) == net
   end
 
   def contains?(%Block{}, _) do
@@ -72,14 +72,16 @@ defmodule RemoteIp.Block do
     end
   end
 
-  defp process(:block, <<_::32>> = ip, prefix) when prefix in 0..32 do
+  defp process(:block, <<ip::32>>, prefix) when prefix in 0..32 do
     ones = 0xFFFFFFFF
-    {:ok, %Block{ip: ip, mask: <<(~~~(ones >>> prefix))::32>>}}
+    mask = ~~~(ones >>> prefix)
+    {:ok, %Block{net: <<ip &&& mask::32>>, mask: <<mask::32>>}}
   end
 
-  defp process(:block, <<_::128>> = ip, prefix) when prefix in 0..128 do
+  defp process(:block, <<ip::128>>, prefix) when prefix in 0..128 do
     ones = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    {:ok, %Block{ip: ip, mask: <<(~~~(ones >>> prefix))::128>>}}
+    mask = ~~~(ones >>> prefix)
+    {:ok, %Block{net: <<ip &&& mask::128>>, mask: <<mask::128>>}}
   end
 
   defp process(:block, _, prefix) do

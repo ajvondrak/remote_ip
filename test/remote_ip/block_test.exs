@@ -75,13 +75,13 @@ defmodule RemoteIp.BlockTest do
 
     test "addresses" do
       [a, b, c, d] = octets(4)
-      assert %Block{ip: <<^a, ^b, ^c, ^d>>} = parse!(ipv4([a, b, c, d]))
-      assert %Block{ip: <<0, 0, 0, 0>>} = parse!("0.0.0.0/0")
-      assert %Block{ip: <<255, 255, 255, 255>>} = parse!("255.255.255.255/0")
-      assert %Block{ip: <<10, 0, 0, 0>>} = parse!("10.0.0.0/8")
-      assert %Block{ip: <<127, 0, 0, 1>>} = parse!("127.0.0.1/32")
-      assert %Block{ip: <<192, 168, 0, 1>>} = parse!("192.168.0.1/32")
-      assert %Block{ip: <<3, 14, 15, 92>>} = parse!("3.14.15.92/7")
+      assert %Block{net: <<^a, ^b, ^c, ^d>>} = parse!(ipv4([a, b, c, d]))
+      assert %Block{net: <<0, 0, 0, 0>>} = parse!("0.0.0.0")
+      assert %Block{net: <<255, 255, 255, 255>>} = parse!("255.255.255.255")
+      assert %Block{net: <<10, 0, 0, 0>>} = parse!("10.0.0.0")
+      assert %Block{net: <<127, 0, 0, 1>>} = parse!("127.0.0.1")
+      assert %Block{net: <<192, 168, 0, 1>>} = parse!("192.168.0.1")
+      assert %Block{net: <<3, 14, 15, 92>>} = parse!("3.14.15.92")
     end
 
     test "masks" do
@@ -121,10 +121,10 @@ defmodule RemoteIp.BlockTest do
     end
 
     test "reserved ranges" do
-      assert parse!("127.0.0.0/8") == %Block{ip: <<127, 0, 0, 0>>, mask: <<255, 0, 0, 0>>}
-      assert parse!("10.0.0.0/8") == %Block{ip: <<10, 0, 0, 0>>, mask: <<255, 0, 0, 0>>}
-      assert parse!("172.16.0.0/12") == %Block{ip: <<172, 16, 0, 0>>, mask: <<255, 240, 0, 0>>}
-      assert parse!("192.168.0.0/16") == %Block{ip: <<192, 168, 0, 0>>, mask: <<255, 255, 0, 0>>}
+      assert parse!("127.0.0.0/8") == %Block{net: <<127, 0, 0, 0>>, mask: <<255, 0, 0, 0>>}
+      assert parse!("10.0.0.0/8") == %Block{net: <<10, 0, 0, 0>>, mask: <<255, 0, 0, 0>>}
+      assert parse!("172.16.0.0/12") == %Block{net: <<172, 16, 0, 0>>, mask: <<255, 240, 0, 0>>}
+      assert parse!("192.168.0.0/16") == %Block{net: <<192, 168, 0, 0>>, mask: <<255, 255, 0, 0>>}
     end
   end
 
@@ -166,12 +166,12 @@ defmodule RemoteIp.BlockTest do
 
     test "addresses" do
       [a, b, c, d, e, f, g, h] = hextets(8)
-      assert %Block{ip: <<^a::16, ^b::16, ^c::16, ^d::16, ^e::16, ^f::16, ^g::16, ^h::16>>} = parse!(ipv6([a, b, c, d, e, f, g, h]))
-      assert %Block{ip: <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>} = parse!("::/0")
-      assert %Block{ip: <<255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255>>} = parse!("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff/128")
-      assert %Block{ip: <<0x1111::16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x9999::16>>} = parse!("1111::9999/10")
-      assert %Block{ip: <<0x000A::16, 0x000B::16, 0x000C::16, 0x000D::16, 0x000E::16, 0x000F::16, 0, 0, 0, 0>>} = parse!("a:b:c:d:e:f::/16")
-      assert %Block{ip: <<0x0003::16, 0x0014::16, 0x0159::16, 0x2653::16, 0x0005::16, 0x0089::16, 0x0793::16, 0x2384::16>>} = parse!("3:14:159:2653:5:89:793:2384/62")
+      assert %Block{net: <<^a::16, ^b::16, ^c::16, ^d::16, ^e::16, ^f::16, ^g::16, ^h::16>>} = parse!(ipv6([a, b, c, d, e, f, g, h]))
+      assert %Block{net: <<0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>} = parse!("::")
+      assert %Block{net: <<255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255>>} = parse!("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff")
+      assert %Block{net: <<0x1111::16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x9999::16>>} = parse!("1111::9999")
+      assert %Block{net: <<0x000A::16, 0x000B::16, 0x000C::16, 0x000D::16, 0x000E::16, 0x000F::16, 0, 0, 0, 0>>} = parse!("a:b:c:d:e:f::")
+      assert %Block{net: <<0x0003::16, 0x0014::16, 0x0159::16, 0x2653::16, 0x0005::16, 0x0089::16, 0x0793::16, 0x2384::16>>} = parse!("3:14:159:2653:5:89:793:2384")
     end
 
     test "masks" do
@@ -308,12 +308,12 @@ defmodule RemoteIp.BlockTest do
 
     test "reserved ranges" do
       assert parse!("::1/128") == %Block{
-               ip: <<0x00000000000000000000000000000001::128>>,
+               net: <<0x00000000000000000000000000000001::128>>,
                mask: <<0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF::128>>
              }
 
       assert parse!("fc00::/7") == %Block{
-               ip: <<0xFC000000000000000000000000000000::128>>,
+               net: <<0xFC000000000000000000000000000000::128>>,
                mask: <<0xFE000000000000000000000000000000::128>>
              }
     end
@@ -353,6 +353,7 @@ defmodule RemoteIp.BlockTest do
 
     test "with lower bits that are masked off" do
       block = parse!("192.168.100.14/24")
+      assert block.net == <<192, 168, 100, 0>>
 
       for member <- 0..255 do
         assert Block.contains?(block, {192, 168, 100, member})
@@ -396,6 +397,7 @@ defmodule RemoteIp.BlockTest do
 
     test "with lower bits that are masked off" do
       block = parse!("a:b:c:d:e:f::/48")
+      assert block.net == <<0x000A::16, 0x000B::16, 0x00C::16, 0::16, 0::16, 0::16, 0::16, 0::16>>
       [d, e, f, g, h] = hextets(5)
       assert Block.contains?(block, {0x000A, 0x000B, 0x000C, d, e, f, g, h})
     end
