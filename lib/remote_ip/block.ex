@@ -6,6 +6,14 @@ defmodule RemoteIp.Block do
 
   defstruct [:ip, :mask]
 
+  def encode({a, b, c, d}) do
+    <<a::8, b::8, c::8, d::8>>
+  end
+
+  def encode({a, b, c, d, e, f, g, h}) do
+    <<a::16, b::16, c::16, d::16, e::16, f::16, g::16, h::16>>
+  end
+
   def contains?(%Block{} = block, ip) when is_tuple(ip) do
     contains?(block, encode(ip))
   end
@@ -76,13 +84,5 @@ defmodule RemoteIp.Block do
 
   defp process(:block, _, prefix) do
     {:error, "Invalid prefix #{inspect(prefix)}"}
-  end
-
-  defp encode({a, b, c, d}) do
-    <<a::8, b::8, c::8, d::8>>
-  end
-
-  defp encode({a, b, c, d, e, f, g, h}) do
-    <<a::16, b::16, c::16, d::16, e::16, f::16, g::16, h::16>>
   end
 end

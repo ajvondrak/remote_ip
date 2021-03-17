@@ -10,11 +10,16 @@ blocks = %{
 }
 
 suite = %{
-  remote_ip: fn ips ->
-    Enum.each(ips, fn ip ->
-      Enum.each(blocks[:remote_ip], &RemoteIp.Block.contains?(&1, ip))
-    end)
-  end,
+  remote_ip: {
+    fn ips ->
+      Enum.each(ips, fn ip ->
+        Enum.each(blocks[:remote_ip], &RemoteIp.Block.contains?(&1, ip))
+      end)
+    end,
+    before_scenario: fn ips ->
+      Enum.map(ips, &RemoteIp.Block.encode/1)
+    end,
+  },
   inet_cidr: fn ips ->
     Enum.each(ips, fn ip ->
       Enum.each(blocks[:inet_cidr], &InetCidr.contains?(&1, ip))
