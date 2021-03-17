@@ -4,29 +4,23 @@ defmodule RemoteIp.Block do
 
   @moduledoc false
 
-  defstruct [:net, :mask]
+  defstruct [:proto, :net, :mask]
 
   def encode({a, b, c, d}) do
-    <<a::8, b::8, c::8, d::8>>
+    <<ip::32>> = <<a::8, b::8, c::8, d::8>>
+    {:v4, ip}
   end
 
   def encode({a, b, c, d, e, f, g, h}) do
-    <<a::16, b::16, c::16, d::16, e::16, f::16, g::16, h::16>>
+    <<ip::128>> = <<a::16, b::16, c::16, d::16, e::16, f::16, g::16, h::16>>
+    {:v6, ip}
   end
 
-  def contains?(%Block{} = block, ip) when is_tuple(ip) do
-    contains?(block, encode(ip))
-  end
-
-  def contains?(%Block{net: <<net::32>>, mask: <<mask::32>>}, <<ip::32>>) do
+  def contains?(%Block{proto: proto, net: net, mask: mask}, {proto, ip}) do
     (ip &&& mask) == net
   end
 
-  def contains?(%Block{net: <<net::128>>, mask: <<mask::128>>}, <<ip::128>>) do
-    (ip &&& mask) == net
-  end
-
-  def contains?(%Block{}, _) do
+  def contains?(%Block{}, {_, _}) do
     false
   end
 
@@ -53,7 +47,7 @@ defmodule RemoteIp.Block do
 
   defp process(:parts, [ip]) do
     with {:ok, ip} <- process(:ip, ip) do
-      process(:block, ip, bit_size(ip))
+      process(:block, ip)
     end
   end
 
@@ -72,16 +66,24 @@ defmodule RemoteIp.Block do
     end
   end
 
-  defp process(:block, <<ip::32>>, prefix) when prefix in 0..32 do
-    ones = 0xFFFFFFFF
-    mask = ~~~(ones >>> prefix)
-    {:ok, %Block{net: <<ip &&& mask::32>>, mask: <<mask::32>>}}
+  defp process(:block, {:v4, ip}) do
+    process(:block, {:v4, ip}, 32)
   end
 
-  defp process(:block, <<ip::128>>, prefix) when prefix in 0..128 do
+  defp process(:block, {:v6, ip}) do
+    process(:block, {:v6, ip}, 128)
+  end
+
+  defp process(:block, {:v4, ip}, prefix) when prefix in 0..32 do
+    ones = 0xFFFFFFFF
+    <<mask::32>> = <<(~~~(ones >>> prefix))::32>>
+    {:ok, %Block{proto: :v4, net: ip &&& mask, mask: mask}}
+  end
+
+  defp process(:block, {:v6, ip}, prefix) when prefix in 0..128 do
     ones = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    mask = ~~~(ones >>> prefix)
-    {:ok, %Block{net: <<ip &&& mask::128>>, mask: <<mask::128>>}}
+    <<mask::128>> = <<(~~~(ones >>> prefix))::128>>
+    {:ok, %Block{proto: :v6, net: ip &&& mask, mask: mask}}
   end
 
   defp process(:block, _, prefix) do

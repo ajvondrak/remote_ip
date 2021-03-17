@@ -49,42 +49,42 @@ Benchmarking remote_ip with input small...
 
 ##### With input large #####
 Name                ips        average  deviation         median         99th %
-remote_ip        269.37        3.71 ms     ±6.78%        3.66 ms        5.03 ms
-cider            249.10        4.01 ms     ±9.59%        3.92 ms        5.46 ms
-inet_cidr        224.87        4.45 ms     ±5.54%        4.38 ms        5.48 ms
-cidr             160.27        6.24 ms     ±4.31%        6.16 ms        7.22 ms
+cider            257.12        3.89 ms     ±8.66%        3.90 ms        5.70 ms
+remote_ip        252.18        3.97 ms     ±8.25%        3.97 ms        5.49 ms
+inet_cidr        227.39        4.40 ms     ±7.18%        4.39 ms        5.70 ms
+cidr             165.12        6.06 ms     ±6.44%        6.07 ms        7.50 ms
 
 Comparison: 
-remote_ip        269.37
-cider            249.10 - 1.08x slower +0.30 ms
-inet_cidr        224.87 - 1.20x slower +0.73 ms
-cidr             160.27 - 1.68x slower +2.53 ms
+cider            257.12
+remote_ip        252.18 - 1.02x slower +0.0763 ms
+inet_cidr        227.39 - 1.13x slower +0.51 ms
+cidr             165.12 - 1.56x slower +2.17 ms
 
 ##### With input medium #####
 Name                ips        average  deviation         median         99th %
-remote_ip        3.09 K      323.96 μs    ±11.28%         317 μs         487 μs
-cider            2.93 K      341.25 μs    ±19.22%         324 μs      582.11 μs
-inet_cidr        2.76 K      362.50 μs    ±13.18%         355 μs      569.28 μs
-cidr             1.93 K      517.99 μs     ±9.41%         507 μs      738.56 μs
+cider            3.12 K      320.07 μs    ±14.98%      307.98 μs      518.32 μs
+remote_ip        3.07 K      325.41 μs    ±19.04%      314.98 μs      541.98 μs
+inet_cidr        2.76 K      362.71 μs    ±15.15%      351.98 μs      594.98 μs
+cidr             1.96 K      510.74 μs    ±12.63%      504.98 μs      780.39 μs
 
 Comparison: 
-remote_ip        3.09 K
-cider            2.93 K - 1.05x slower +17.29 μs
-inet_cidr        2.76 K - 1.12x slower +38.54 μs
-cidr             1.93 K - 1.60x slower +194.03 μs
+cider            3.12 K
+remote_ip        3.07 K - 1.02x slower +5.35 μs
+inet_cidr        2.76 K - 1.13x slower +42.64 μs
+cidr             1.96 K - 1.60x slower +190.67 μs
 
 ##### With input small #####
 Name                ips        average  deviation         median         99th %
-remote_ip       29.97 K       33.37 μs    ±32.23%          31 μs          71 μs
-cider           28.35 K       35.27 μs    ±31.02%          33 μs          76 μs
-inet_cidr       26.25 K       38.09 μs    ±30.65%          35 μs       80.94 μs
-cidr            18.06 K       55.37 μs    ±23.19%          52 μs         108 μs
+remote_ip       29.21 K       34.23 μs    ±32.73%       30.98 μs       78.98 μs
+cider           28.93 K       34.56 μs    ±30.08%       32.98 μs       77.98 μs
+inet_cidr       25.98 K       38.50 μs    ±32.61%       35.98 μs       85.98 μs
+cidr            18.25 K       54.80 μs    ±25.68%       52.98 μs      124.98 μs
 
 Comparison: 
-remote_ip       29.97 K
-cider           28.35 K - 1.06x slower +1.90 μs
-inet_cidr       26.25 K - 1.14x slower +4.72 μs
-cidr            18.06 K - 1.66x slower +22.00 μs
+remote_ip       29.21 K
+cider           28.93 K - 1.01x slower +0.33 μs
+inet_cidr       25.98 K - 1.12x slower +4.26 μs
+cidr            18.25 K - 1.60x slower +20.57 μs
 ```
 
 ### Checking IPs
@@ -125,40 +125,40 @@ Benchmarking remote_ip with input small...
 
 ##### With input large #####
 Name                ips        average  deviation         median         99th %
-cider             11.10       90.10 ms     ±3.39%       90.51 ms       95.98 ms
-remote_ip          6.75      148.19 ms     ±2.27%      147.66 ms      156.78 ms
-inet_cidr          6.65      150.38 ms     ±2.66%      150.25 ms      157.34 ms
-cidr               1.55      647.23 ms     ±1.11%      649.57 ms      655.39 ms
+remote_ip         15.17       65.91 ms     ±3.32%       65.95 ms       71.84 ms
+cider             11.21       89.18 ms     ±3.01%       89.75 ms       94.94 ms
+inet_cidr          6.53      153.13 ms     ±2.67%      153.22 ms      163.81 ms
+cidr               1.52      658.38 ms     ±1.21%      654.94 ms      670.14 ms
 
 Comparison: 
-cider             11.10
-remote_ip          6.75 - 1.64x slower +58.09 ms
-inet_cidr          6.65 - 1.67x slower +60.27 ms
-cidr               1.55 - 7.18x slower +557.12 ms
+remote_ip         15.17
+cider             11.21 - 1.35x slower +23.28 ms
+inet_cidr          6.53 - 2.32x slower +87.23 ms
+cidr               1.52 - 9.99x slower +592.47 ms
 
 ##### With input medium #####
 Name                ips        average  deviation         median         99th %
-cider            112.48        8.89 ms     ±6.23%        8.92 ms       11.09 ms
-remote_ip         72.66       13.76 ms     ±6.04%       13.72 ms       16.59 ms
-inet_cidr         66.50       15.04 ms     ±4.95%       15.07 ms       17.22 ms
-cidr              16.17       61.86 ms     ±3.70%       62.33 ms       66.24 ms
+remote_ip        152.78        6.55 ms     ±6.32%        6.54 ms        8.05 ms
+cider            113.19        8.83 ms     ±5.85%        8.85 ms       10.72 ms
+inet_cidr         65.15       15.35 ms     ±4.81%       15.36 ms       17.60 ms
+cidr              15.85       63.11 ms     ±3.43%       63.08 ms       67.38 ms
 
 Comparison: 
-cider            112.48
-remote_ip         72.66 - 1.55x slower +4.87 ms
-inet_cidr         66.50 - 1.69x slower +6.15 ms
-cidr              16.17 - 6.96x slower +52.97 ms
+remote_ip        152.78
+cider            113.19 - 1.35x slower +2.29 ms
+inet_cidr         65.15 - 2.35x slower +8.80 ms
+cidr              15.85 - 9.64x slower +56.56 ms
 
 ##### With input small #####
 Name                ips        average  deviation         median         99th %
-cider           1157.20        0.86 ms    ±10.81%        0.87 ms        1.25 ms
-remote_ip        703.21        1.42 ms    ±10.83%        1.41 ms        2.04 ms
-inet_cidr        641.30        1.56 ms     ±9.84%        1.55 ms        2.19 ms
-cidr             160.31        6.24 ms     ±7.10%        6.24 ms        8.05 ms
+remote_ip        1.55 K        0.64 ms    ±10.79%        0.64 ms        0.92 ms
+cider            1.12 K        0.89 ms    ±11.01%        0.89 ms        1.29 ms
+inet_cidr        0.63 K        1.59 ms     ±9.59%        1.58 ms        2.21 ms
+cidr            0.160 K        6.27 ms     ±6.60%        6.30 ms        8.10 ms
 
 Comparison: 
-cider           1157.20
-remote_ip        703.21 - 1.65x slower +0.56 ms
-inet_cidr        641.30 - 1.80x slower +0.70 ms
-cidr             160.31 - 7.22x slower +5.37 ms
+remote_ip        1.55 K
+cider            1.12 K - 1.39x slower +0.25 ms
+inet_cidr        0.63 K - 2.47x slower +0.94 ms
+cidr            0.160 K - 9.74x slower +5.62 ms
 ```
