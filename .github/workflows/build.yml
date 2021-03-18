@@ -26,9 +26,9 @@ jobs:
             otp: '20'
           - elixir: '1.10'
             otp: '21'
-          - elixir: '1.11'
+          - elixir: '1.11.3'
             otp: '21'
-          - elixir: '1.11'
+          - elixir: '1.11.3'
             otp: '23'
 
     name: Elixir ${{ matrix.elixir }} (OTP ${{ matrix.otp }})
