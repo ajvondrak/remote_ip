@@ -112,3 +112,17 @@ cider             10.68 - 1.37x slower +25.16 ms
 inet_cidr          6.37 - 2.29x slower +88.38 ms
 cidr               1.53 - 9.53x slower +584.23 ms
 ```
+
+## Other considerations
+
+Performance is a nice, objective nail in the coffin for these other libraries. But they also have other issues that make them impractical to use:
+
+* inet\_cidr doesn't parse individual IP addresses, so instead of `"1.2.3.4"` you have to say `"1.2.3.4/32"`
+* cidr's `CIDR.match/2` interface is awkward compared to the boolean `contains?/2` functions provided by everyone else
+* cider fails to distinguish between IPv4 and IPv6 addresses, so it produces false positives like
+    ```elixir
+    iex> Cider.contains?({0, 0, 0, 1}, Cider.parse("::1"))
+    true
+    ```
+
+remote\_ip's implementation neatly handles all of these limitations while also performing significantly better.
