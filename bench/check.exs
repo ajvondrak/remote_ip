@@ -1,8 +1,17 @@
 Bench.Inputs.seed
 
+ips = Bench.Inputs.ips(1_000)
+
+parsed_ips = %{
+  remote_ip: Enum.map(ips, &RemoteIp.Block.encode/1),
+  inet_cidr: ips,
+  cider: Enum.map(ips, &Cider.ip!/1),
+  cidr: ips,
+}
+
 cidrs = Bench.Inputs.cidrs(1_000)
 
-blocks = %{
+parsed_cidrs = %{
   remote_ip: Enum.map(cidrs, &RemoteIp.Block.parse!/1),
   inet_cidr: Enum.map(cidrs, &InetCidr.parse(&1, true)),
   cider: Enum.map(cidrs, &Cider.parse/1),
@@ -10,42 +19,31 @@ blocks = %{
 }
 
 suite = %{
-  remote_ip: {
-    fn ips ->
-      Enum.each(ips, fn ip ->
-        Enum.each(blocks[:remote_ip], &RemoteIp.Block.contains?(&1, ip))
-      end)
-    end,
-    before_scenario: fn ips ->
-      Enum.map(ips, &RemoteIp.Block.encode/1)
-    end,
-  },
-  inet_cidr: fn ips ->
-    Enum.each(ips, fn ip ->
-      Enum.each(blocks[:inet_cidr], &InetCidr.contains?(&1, ip))
+  remote_ip: fn ->
+    Enum.each(parsed_ips[:remote_ip], fn ip ->
+      Enum.each(parsed_cidrs[:remote_ip], &RemoteIp.Block.contains?(&1, ip))
     end)
   end,
-  cider: {
-    fn ips ->
-      Enum.each(ips, fn ip ->
-        Enum.each(blocks[:cider], &Cider.contains?(ip, &1))
-      end)
-    end,
-    before_scenario: fn ips ->
-      Enum.map(ips, &Cider.ip!/1)
-    end,
-  },
-  cidr: fn ips ->
-    Enum.each(ips, fn ip ->
-      Enum.each(blocks[:cidr], &CIDR.match(&1, ip))
+  inet_cidr: fn ->
+    Enum.each(parsed_ips[:inet_cidr], fn ip ->
+      Enum.each(parsed_cidrs[:inet_cidr], &InetCidr.contains?(&1, ip))
+    end)
+  end,
+  cider: fn ->
+    Enum.each(parsed_ips[:cider], fn ip ->
+      Enum.each(parsed_cidrs[:cider], &Cider.contains?(ip, &1))
+    end)
+  end,
+  cidr: fn ->
+    Enum.each(parsed_ips[:cidr], fn ip ->
+      Enum.each(parsed_cidrs[:cidr], &CIDR.match(&1, ip))
     end)
   end,
 }
 
-inputs = %{
-  small: Bench.Inputs.ips(10),
-  medium: Bench.Inputs.ips(100),
-  large: Bench.Inputs.ips(1_000),
-}
+formatters = [
+  {Benchee.Formatters.HTML, file: "tmp/check.html", auto_open: false},
+  Benchee.Formatters.Console,
+]
 
-Benchee.run(suite, inputs: inputs)
+Benchee.run(suite, formatters: formatters)

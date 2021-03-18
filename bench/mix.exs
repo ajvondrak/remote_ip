@@ -19,6 +19,7 @@ defmodule Bench.MixProject do
   defp deps do
     [
       {:benchee, "~> 1.0"},
+      {:benchee_html, "~> 1.0"},
       {:inet_cidr, "~> 1.0"},
       {:cidr, "~> 1.0"},
       {:cider, "~> 0.3"},
