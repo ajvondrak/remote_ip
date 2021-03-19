@@ -34,6 +34,20 @@ defmodule RemoteIp.BlockTest do
     end
   end
 
+  test "IPv4 block to string" do
+    assert "3.14.15.92/32" == Block.parse!("3.14.15.92/32") |> to_string()
+    assert "3.14.15.0/24" == Block.parse!("3.14.15.92/24") |> to_string()
+    assert "3.14.0.0/16" == Block.parse!("3.14.15.92/16") |> to_string()
+    assert "3.0.0.0/8" == Block.parse!("3.14.15.92/8") |> to_string()
+    assert "0.0.0.0/0" == Block.parse!("3.14.15.92/0") |> to_string()
+  end
+
+  test "IPv6 block to string" do
+    assert "123::456/128" == Block.parse!("123::456/128") |> to_string()
+    assert "123::/64" == Block.parse!("123::456/64") |> to_string()
+    assert "::/0" == Block.parse!("123::456/0") |> to_string()
+  end
+
   describe "parsing IPv4" do
     test "invalid address and prefix" do
       assert_raise ArgumentError, ~S'Invalid address "3.14" in CIDR "3.14/159"', fn ->
