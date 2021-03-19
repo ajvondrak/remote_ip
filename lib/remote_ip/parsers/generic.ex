@@ -29,7 +29,7 @@ defmodule RemoteIp.Parsers.Generic do
 
   @impl RemoteIp.Parser
 
-  def parse(header) when is_binary(header) do
+  def parse(header) do
     header |> split_commas() |> parse_ips()
   end
 

@@ -24,7 +24,7 @@ defmodule RemoteIp.Parsers.Forwarded do
 
   @impl RemoteIp.Parser
 
-  def parse(header) when is_binary(header) do
+  def parse(header) do
     case Combine.parse(header, forwarded()) do
       [elements] -> Enum.flat_map(elements, &parse_forwarded_for/1)
       _ -> []

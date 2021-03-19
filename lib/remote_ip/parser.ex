@@ -33,5 +33,5 @@ defmodule RemoteIp.Parser do
   faithfully parsing the literal order given by the header.
   """
 
-  @callback parse(value :: binary()) :: [:inet.ip_address()]
+  @callback parse(header :: binary()) :: [:inet.ip_address()]
 end
