@@ -39,8 +39,19 @@ defmodule RemoteIp.Options do
     end
   end
 
-  defp evaluate(:headers, headers), do: headers
-  defp evaluate(:parsers, parsers), do: Map.merge(default(:parsers), parsers)
-  defp evaluate(:proxies, proxies), do: proxies |> Enum.map(&InetCidr.parse/1)
-  defp evaluate(:clients, clients), do: clients |> Enum.map(&InetCidr.parse/1)
+  defp evaluate(:headers, headers) do
+    headers
+  end
+
+  defp evaluate(:parsers, parsers) do
+    Map.merge(default(:parsers), parsers)
+  end
+
+  defp evaluate(:proxies, proxies) do
+    proxies |> Enum.map(&RemoteIp.Block.parse!/1)
+  end
+
+  defp evaluate(:clients, clients) do
+    clients |> Enum.map(&RemoteIp.Block.parse!/1)
+  end
 end

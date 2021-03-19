@@ -89,4 +89,21 @@ defmodule RemoteIp.Block do
   defp process(:block, _, prefix) do
     {:error, "Invalid prefix #{inspect(prefix)}"}
   end
+
+  defimpl String.Chars, for: Block do
+    def to_string(%Block{proto: :v4, net: net, mask: mask}) do
+      <<a::8, b::8, c::8, d::8>> = <<net::32>>
+      "#{:inet.ntoa({a, b, c, d})}/#{bits(mask)}"
+    end
+
+    def to_string(%Block{proto: :v6, net: net, mask: mask}) do
+      <<a::16, b::16, c::16, d::16, e::16, f::16, g::16, h::16>> = <<net::128>>
+      "#{:inet.ntoa({a, b, c, d, e, f, g, h})}/#{bits(mask)}"
+    end
+
+    defp bits(mask) do
+      ones = for <<1::1 <- :binary.encode_unsigned(mask)>>, do: 1
+      length(ones)
+    end
+  end
 end

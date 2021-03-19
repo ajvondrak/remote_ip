@@ -34,8 +34,8 @@ defmodule RemoteIp.Debugger do
   def __message__(:options, [], options) do
     headers = inspect(options[:headers])
     parsers = inspect(options[:parsers])
-    proxies = inspect(options[:proxies] |> Enum.map(&InetCidr.to_string/1))
-    clients = inspect(options[:clients] |> Enum.map(&InetCidr.to_string/1))
+    proxies = inspect(options[:proxies] |> Enum.map(&to_string/1))
+    clients = inspect(options[:clients] |> Enum.map(&to_string/1))
 
     [
       "Processing remote IP\n",

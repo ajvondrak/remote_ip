@@ -92,7 +92,8 @@ defmodule RemoteIp.OptionsTest do
 
     test ":proxies list" do
       packed = RemoteIp.Options.pack(proxies: ~w[123.0.0.0/8])
-      assert packed[:proxies] == [{{123, 0, 0, 0}, {123, 255, 255, 255}, 8}]
+      assert [%RemoteIp.Block{} = block] = packed[:proxies]
+      assert to_string(block) == "123.0.0.0/8"
       assert Keyword.has_key?(packed, :headers)
       assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :clients)
@@ -116,7 +117,8 @@ defmodule RemoteIp.OptionsTest do
 
     test ":clients list" do
       packed = RemoteIp.Options.pack(clients: ~w[234.0.0.0/8])
-      assert packed[:clients] == [{{234, 0, 0, 0}, {234, 255, 255, 255}, 8}]
+      assert [%RemoteIp.Block{} = block] = packed[:clients]
+      assert to_string(block) == "234.0.0.0/8"
       assert Keyword.has_key?(packed, :headers)
       assert Keyword.has_key?(packed, :parsers)
       assert Keyword.has_key?(packed, :proxies)
@@ -200,11 +202,13 @@ defmodule RemoteIp.OptionsTest do
 
       MFA.put(:proxies, ~w[123.0.0.0/8])
       unpacked = RemoteIp.Options.unpack(packed)
-      assert unpacked[:proxies] == [{{123, 0, 0, 0}, {123, 255, 255, 255}, 8}]
+      assert [%RemoteIp.Block{} = block] = unpacked[:proxies]
+      assert to_string(block) == "123.0.0.0/8"
 
       MFA.put(:proxies, ~w[234.0.0.0/8])
       unpacked = RemoteIp.Options.unpack(packed)
-      assert unpacked[:proxies] == [{{234, 0, 0, 0}, {234, 255, 255, 255}, 8}]
+      assert [%RemoteIp.Block{} = block] = unpacked[:proxies]
+      assert to_string(block) == "234.0.0.0/8"
     end
 
     test ":clients default" do
@@ -224,11 +228,13 @@ defmodule RemoteIp.OptionsTest do
 
       MFA.put(:clients, ~w[123.0.0.0/8])
       unpacked = RemoteIp.Options.unpack(packed)
-      assert unpacked[:clients] == [{{123, 0, 0, 0}, {123, 255, 255, 255}, 8}]
+      assert [%RemoteIp.Block{} = block] = unpacked[:clients]
+      assert to_string(block) == "123.0.0.0/8"
 
       MFA.put(:clients, ~w[234.0.0.0/8])
       unpacked = RemoteIp.Options.unpack(packed)
-      assert unpacked[:clients] == [{{234, 0, 0, 0}, {234, 255, 255, 255}, 8}]
+      assert [%RemoteIp.Block{} = block] = unpacked[:clients]
+      assert to_string(block) == "234.0.0.0/8"
     end
   end
 end

@@ -188,10 +188,12 @@ defmodule RemoteIp do
     10.0.0.0/8
     172.16.0.0/12
     192.168.0.0/16
-  ] |> Enum.map(&InetCidr.parse/1)
+  ] |> Enum.map(&RemoteIp.Block.parse!/1)
 
   defp type(ip, opts) do
     debug :type, [ip] do
+      ip = RemoteIp.Block.encode(ip)
+
       cond do
         opts[:clients] |> contains?(ip) -> :client
         opts[:proxies] |> contains?(ip) -> :proxy
@@ -201,8 +203,8 @@ defmodule RemoteIp do
     end
   end
 
-  defp contains?(cidrs, ip) do
-    Enum.any?(cidrs, &InetCidr.contains?(&1, ip))
+  defp contains?(blocks, ip) do
+    Enum.any?(blocks, &RemoteIp.Block.contains?(&1, ip))
   end
 
   defp add_metadata(remote_ip) do
