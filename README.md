@@ -4,9 +4,11 @@
 [![coverage status](https://coveralls.io/repos/github/ajvondrak/remote_ip/badge.svg?branch=main)](https://coveralls.io/github/ajvondrak/remote_ip?branch=main)
 [![hex.pm version](https://img.shields.io/hexpm/v/remote_ip)](https://hex.pm/packages/remote_ip)
 
-A [plug](https://github.com/elixir-lang/plug) to overwrite the [`Conn`'s](https://hexdocs.pm/plug/Plug.Conn.html) `remote_ip` based on headers such as `X-Forwarded-For`.
+A [plug](https://github.com/elixir-lang/plug) to overwrite the [`Conn`'s](https://hexdocs.pm/plug/Plug.Conn.html) `remote_ip` based on forwarding headers.
 
-IPs are processed last-to-first to prevent IP spoofing, as thoroughly explained in [a blog post](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) by [@gingerlime](https://github.com/gingerlime). Loopback/private IPs are ignored by default, but known proxies & clients are configurable, so you have full control over which IPs are considered legitimate. You can configure any number of arbitrary forwarding headers to use. If there's a special way to parse your particular header, the architecture of this project should [make it easy](#contributing) to open a pull request so `RemoteIp` can accommodate.
+Generic comma-separated headers like `X-Forwarded-For`, `X-Real-Ip`, and `X-Client-Ip` are all recognized, as well as the [RFC 7239](https://tools.ietf.org/html/rfc7239) `Forwarded` header. You can specify any number of forwarding headers to recognize and even configure your own parsers.
+
+IPs are processed last-to-first to prevent IP spoofing. Loopback/private IPs are ignored by default, but known proxies & clients are configurable, so you have full control over which IPs are considered legitimate.
 
 **If your app is not behind at least one proxy, you should not use this plug.** See [below](#algorithm) for more detailed reasoning.
 
