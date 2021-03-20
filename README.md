@@ -10,7 +10,7 @@ Generic comma-separated headers like `X-Forwarded-For`, `X-Real-Ip`, and `X-Clie
 
 IPs are processed last-to-first to prevent IP spoofing. Loopback/private IPs are ignored by default, but known proxies & clients are configurable, so you have full control over which IPs are considered legitimate.
 
-**If your app is not behind at least one proxy, you should not use this plug.** See [below](#algorithm) for more detailed reasoning.
+**If your app is not behind at least one proxy, you should not use this plug.** See [the algorithm](extras/algorithm.md) for more details.
 
 ## Installation
 

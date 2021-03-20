@@ -55,8 +55,8 @@ defmodule RemoteIp.Options do
 
   2. You shouldn't be relying that heavily on IP addresses for security. Even a
      single plain-text header has enough problems on its own that we can't
-     guarantee its results are accurate. See [the algorithm](#algorithm) for
-     discussion.
+     guarantee its results are accurate. For more details, see the
+     documentation for [the algorithm](algorithm.md).
 
   3. It's more general. Networking setups are often very idiosyncratic, and we
      want to give users the option to use multiple headers if that's what they
@@ -103,7 +103,7 @@ defmodule RemoteIp.Options do
   So instead of listing out 256 different addresses for the `1.2.3.x` block,
   you should say `"1.2.3.0/24"`.
 
-  These proxies are skipped by [the algorithm](#algorithm) and are never
+  These proxies are skipped by [the algorithm](algorithm.md) and are never
   considered the original client IP, unless specifically overruled by the
   `:clients` option.
 
@@ -134,7 +134,7 @@ defmodule RemoteIp.Options do
   you should say `"1.2.3.0/24"`.
 
   These addresses are never considered to be proxies by [the
-  algorithm](#algorithm). For example, if you configure the `:proxies` option
+  algorithm](algorithm.md). For example, if you configure the `:proxies` option
   to include `"1.2.3.0/24"` and the `:clients` option to include `"1.2.3.4"`,
   then every IP in the `1.2.3.x` block would be considered a proxy *except* for
   `1.2.3.4`.

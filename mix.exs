@@ -52,7 +52,11 @@ defmodule RemoteIp.Mixfile do
   end
 
   defp docs do
-    [source_url: "https://github.com/ajvondrak/remote_ip"]
+    [
+      source_url: "https://github.com/ajvondrak/remote_ip",
+      main: "RemoteIp",
+      extras: ["extras/algorithm.md"]
+    ]
   end
 
   defp test_coverage() do

@@ -9,8 +9,8 @@ defmodule RemoteIp do
   Generic comma-separated headers like `X-Forwarded-For`, `X-Real-Ip`, and
   `X-Client-Ip` are all recognized, as well as the [RFC
   7239](https://tools.ietf.org/html/rfc7239) `Forwarded` header. IPs are
-  processed last-to-first to prevent IP spoofing. Read more in the [algorithm
-  documentation](#algorithm).
+  processed last-to-first to prevent IP spoofing. Read more in the
+  documentation for [the algorithm](algorithm.md).
 
   This plug is highly configurable, giving you the power to adapt it to your
   particular networking infrastructure:
