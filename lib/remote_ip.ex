@@ -89,8 +89,8 @@ defmodule RemoteIp do
 
   * `:headers` - a list of header names to consider
   * `:parsers` - a map from header names to custom parser modules
-  * `:clients` - a list of known client IPs in CIDR notation
-  * `:proxies` - a list of known proxy IPs in CIDR notation
+  * `:clients` - a list of known client IPs, either plain or in CIDR notation
+  * `:proxies` - a list of known proxy IPs, either plain or in CIDR notation
 
   You can specify any option using a tuple of `{module, function_name,
   arguments}`, which will be called dynamically at runtime to get the
