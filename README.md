@@ -4,7 +4,7 @@
 [![coverage status](https://coveralls.io/repos/github/ajvondrak/remote_ip/badge.svg?branch=main)](https://coveralls.io/github/ajvondrak/remote_ip?branch=main)
 [![hex.pm version](https://img.shields.io/hexpm/v/remote_ip)](https://hex.pm/packages/remote_ip)
 
-A [plug](https://github.com/elixir-lang/plug) to overwrite the [`Conn`'s](https://hexdocs.pm/plug/Plug.Conn.html) `remote_ip` based on forwarding headers.
+A [plug](https://github.com/elixir-lang/plug) to rewrite the [`Plug.Conn`](https://hexdocs.pm/plug/Plug.Conn.html)'s `remote_ip` based on forwarding headers.
 
 Generic comma-separated headers like `X-Forwarded-For`, `X-Real-Ip`, and `X-Client-Ip` are all recognized, as well as the [RFC 7239](https://tools.ietf.org/html/rfc7239) `Forwarded` header. You can specify any number of forwarding headers to recognize and even configure your own parsers.
 
