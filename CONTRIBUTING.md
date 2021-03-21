@@ -13,40 +13,31 @@
 
 ### Getting the wrong IP
 
-There are many reasons you might not be getting the `remote_ip` value you expect. Before opening an issue, [enable debug-level logging](https://hexdocs.pm/logger/Logger.html#module-configuration) and reproduce your problematic request. You should see logs that look something like this:
+There are many reasons you might not be getting the `remote_ip` value you expect. Before opening an issue, enable `RemoteIp.Debugger` and reproduce your problematic request.
+
+```elixir
+config :remote_ip, debug: true
+```
+
+```console
+$ mix deps.compile --force remote_ip
+```
+
+Then you should see logs like these:
 
 ```
-[debug] RemoteIp is configured with %RemoteIp.Config{
-  clients: [],
-  headers: #MapSet<["forwarded", "x-client-ip", "x-forwarded-for", "x-real-ip"]>,
-  proxies: [
-    {{127, 0, 0, 0}, {127, 255, 255, 255}, 8},
-    {{0, 0, 0, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1}, 128},
-    {{64512, 0, 0, 0, 0, 0, 0, 0},
-     {65023, 65535, 65535, 65535, 65535, 65535, 65535, 65535}, 7},
-    {{10, 0, 0, 0}, {10, 255, 255, 255}, 8},
-    {{172, 16, 0, 0}, {172, 31, 255, 255}, 12},
-    {{192, 168, 0, 0}, {192, 168, 255, 255}, 16}
-  ]
-}
-[debug] RemoteIp.Headers is parsing IPs from the request headers [
-  {"accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
-  {"accept-encoding", "gzip, deflate"},
-  {"accept-language", "en-US,en;q=0.5"},
-  {"connection", "keep-alive"},
-  {"dnt", "1"},
-  {"host", "localhost:4000"},
-  {"upgrade-insecure-requests", "1"},
-  {"user-agent",
-   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"},
-  {"x-forwarded-for", "1.2.3.4, 2.3.4.5, 192.168.0.1, 127.0.0.1"}
-]
-[debug] RemoteIp.Headers is only considering the request headers [{"x-forwarded-for", "1.2.3.4, 2.3.4.5, 192.168.0.1, 127.0.0.1"}]
-[debug] RemoteIp.Headers parsed the request headers into the IPs [{1, 2, 3, 4}, {2, 3, 4, 5}, {192, 168, 0, 1}, {127, 0, 0, 1}]
-[debug] RemoteIp thinks {127, 0, 0, 1} is a known proxy IP
-[debug] RemoteIp thinks {192, 168, 0, 1} is a known proxy IP
-[debug] RemoteIp assumes {2, 3, 4, 5} is a client IP
-[debug] RemoteIp determined the remote IP is {2, 3, 4, 5}
+[debug] Processing remote IP
+  headers: ["x-forwarded-for"]
+  parsers: %{"forwarded" => RemoteIp.Parsers.Forwarded}
+  proxies: ["1.2.0.0/16", "2.3.4.5/32"]
+  clients: ["1.2.3.4/32"]
+[debug] Taking forwarding headers from [{"accept", "*/*"}, {"x-forwarded-for", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+[debug] Parsing IPs from forwarding headers: [{"x-forwarded-for", "1.2.3.4, 10.0.0.1, 2.3.4.5"}]
+[debug] Parsed IPs from forwarding headers: [{1, 2, 3, 4}, {10, 0, 0, 1}, {2, 3, 4, 5}]
+[debug] {2, 3, 4, 5} is a known proxy IP
+[debug] {10, 0, 0, 1} is a reserved IP
+[debug] {1, 2, 3, 4} is a known client IP
+[debug] Processed remote IP, found client {1, 2, 3, 4} to replace {127, 0, 0, 1}
 ```
 
 This can help you narrow down the issue:
@@ -57,56 +48,8 @@ This can help you narrow down the issue:
 * Did you configure `:proxies` right? If you don't configure an IP as a known proxy, `RemoteIp` assumes it's a legitimate client.
 * Did you configure `:clients` right? Loopback or private IPs are automatically identified as proxies. If you need to carve out exceptions, you should add the relevant IP ranges to the list of known clients.
 * Are all the IPs being parsed correctly? `RemoteIp` will ignore values that it cannot parse. Either this is a bug in `RemoteIp` or a bad header.
-* Are the forwarding headers in the right order? IPs are processed last-to-first to prevent spoofing. Make sure you understand the [algorithm](README.md#algorithm).
-* Are there multiple "competing" forwarding headers? The order we see the `req_headers` in the `Plug.Conn` matters for the last-to-first processing. Unfortunately, servers like [cowboy](https://github.com/ninenines/cowboy) can distort the order of incoming headers, since [Erlang maps](http://erlang.org/doc/man/maps.html) do not [preserve ordering](https://medium.com/@jlouis666/breaking-erlang-maps-1-31952b8729e6) (cf. [[1]](https://github.com/elixir-plug/plug_cowboy/blob/7bf68cd757c1a052e227112b681b77066fd84d2b/lib/plug/cowboy/conn.ex#L125-L127), [[2]](https://github.com/erlang/otp/blob/2c882ec2d504019f07104b3240a989148dfc1fa3/lib/stdlib/doc/src/maps.xml#L409)). For example, notice how the header lines appear in one order from `curl`, but a different order in the Elixir logs:
-
-    ```console
-    $ curl -v -H'X-Forwarded-For: 1.2.3.4' -H'Forwarded: for=2.3.4.5' localhost:4000
-    * Rebuilt URL to: localhost:4000/
-    *   Trying ::1...
-    * TCP_NODELAY set
-    * Connection failed
-    * connect to ::1 port 4000 failed: Connection refused
-    *   Trying 127.0.0.1...
-    * TCP_NODELAY set
-    * Connected to localhost (127.0.0.1) port 4000 (#0)
-    > GET / HTTP/1.1
-    > Host: localhost:4000
-    > User-Agent: curl/7.54.0
-    > Accept: */*
-    > X-Forwarded-For: 1.2.3.4
-    > Forwarded: for=2.3.4.5
-    [...]
-    ```
-
-    ```
-    [debug] RemoteIp is configured with %RemoteIp.Config{
-      clients: [],
-      headers: #MapSet<["forwarded", "x-client-ip", "x-forwarded-for", "x-real-ip"]>,
-      proxies: [
-        {{127, 0, 0, 0}, {127, 255, 255, 255}, 8},
-        {{0, 0, 0, 0, 0, 0, 0, 1}, {0, 0, 0, 0, 0, 0, 0, 1}, 128},
-        {{64512, 0, 0, 0, 0, 0, 0, 0},
-         {65023, 65535, 65535, 65535, 65535, 65535, 65535, 65535}, 7},
-        {{10, 0, 0, 0}, {10, 255, 255, 255}, 8},
-        {{172, 16, 0, 0}, {172, 31, 255, 255}, 12},
-        {{192, 168, 0, 0}, {192, 168, 255, 255}, 16}
-      ]
-    }
-    [debug] RemoteIp.Headers is parsing IPs from the request headers [
-      {"accept", "*/*"},
-      {"forwarded", "for=2.3.4.5"},
-      {"host", "localhost:4000"},
-      {"user-agent", "curl/7.54.0"},
-      {"x-forwarded-for", "1.2.3.4"}
-    ]
-    [debug] RemoteIp.Headers is only considering the request headers [{"forwarded", "for=2.3.4.5"}, {"x-forwarded-for", "1.2.3.4"}]
-    [debug] RemoteIp.Headers parsed the request headers into the IPs [{2, 3, 4, 5}, {1, 2, 3, 4}]
-    [debug] RemoteIp assumes {1, 2, 3, 4} is a client IP
-    [debug] RemoteIp determined the remote IP is {1, 2, 3, 4}
-    ```
-
-    You *might* be able to [configure `RemoteIp`](README.md#configuration) to avoid your particular problematic situation.
+* Are the forwarding headers in the right order? IPs are processed last-to-first to prevent spoofing. Make sure you understand [the algorithm](extras/algorithm.md).
+* Are there multiple "competing" forwarding headers? The order we see the `req_headers` in the `Plug.Conn` matters for the last-to-first processing. Unfortunately, servers like [cowboy](https://github.com/ninenines/cowboy) can distort the order of incoming headers, since [Erlang maps](http://erlang.org/doc/man/maps.html) do not [preserve ordering](https://medium.com/@jlouis666/breaking-erlang-maps-1-31952b8729e6) (cf. [[1]](https://github.com/elixir-plug/plug_cowboy/blob/7bf68cd757c1a052e227112b681b77066fd84d2b/lib/plug/cowboy/conn.ex#L125-L127), [[2]](https://github.com/erlang/otp/blob/2c882ec2d504019f07104b3240a989148dfc1fa3/lib/stdlib/doc/src/maps.xml#L409)). You *might* be able to configure `RemoteIp` to avoid your particular problematic situation.
 
 If none of the above apply, you may have found a bug in `RemoteIp`, so please go ahead and open an issue.
 
