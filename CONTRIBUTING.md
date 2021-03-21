@@ -5,8 +5,6 @@
   * [Getting the wrong IP](#getting-the-wrong-ip)
   * [Other issues](#other-issues)
 * [Pull Requests](#pull-requests)
-  * [Adding a new header](#adding-a-new-header)
-  * [Other enhancements](#other-enhancements)
   * [General guidelines](#general-guidelines)
 
 ## Issues
