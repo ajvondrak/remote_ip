@@ -72,28 +72,7 @@ All manner of issues are welcome. However, I don't often have much time to work 
 
 ## Pull Requests
 
-### Adding a new header
-
-If there's some header that `RemoteIp` does not parse properly, support is easy to add:
-
-1. Fork this project.
-2. Add a module under `RemoteIp.Headers.YourNewHeader`.
-3. In this new module, export the function `parse/1` that takes in the string value of a single header and returns a list of 0 or more IP addresses parsed from that value. You should use [`:inet.parse_strict_address/1`](http://erlang.org/doc/man/inet.html#parse_strict_address-1) or related functions to do the "dirty work" of parsing the actual IP values. The `parse/1` function is just to find the IPs buried within the string.
-4. Add tests for your new `RemoteIp.Headers.YourNewHeader.parse/1` function.
-5. Add a clause to the private function `RemoteIp.Headers.parse_ips/1` that calls `RemoteIp.Headers.YourNewHeader.parse`.
-6. Open a pull request!
-
-For an example of just such an extension, check out:
-
-* [`RemoteIp.Headers.Forwarded`](https://github.com/ajvondrak/remote_ip/blob/master/lib/remote_ip/headers/forwarded.ex)
-* [`RemoteIp.Headers.ForwardedTest`](https://github.com/ajvondrak/remote_ip/blob/master/test/remote_ip/headers/forwarded_test.exs)
-* [The corresponding `RemoteIp.Headers.parse_ips/1` clause](https://github.com/ajvondrak/remote_ip/blob/ab2d6fe17ea7361dd998e3d0664142f2b4c8b2ea/lib/remote_ip/headers.ex#L16-L18)
-
-If there's demand, I'm open to `RemoteIp` supporting user-configurable parsers. For now, I think the pull request workflow should be sufficient.
-
-### Other enhancements
-
-If there's some other bug or feature not related to parsing a new header, open pull request through the usual means:
+If there's some bug you've fixed or feature you've implemented, contribute your changes through the usual means:
 
 1. Fork this project.
 2. Commit your changes.
