@@ -48,7 +48,7 @@ RemoteIp.from(x_headers)
 
 See the [documentation](https://hexdocs.pm/remote_ip) for full details on usage, configuration options, and troubleshooting.
 
-## Background
+## Motivation
 
 ### Problem: Your app is behind a proxy and you want to know the original client's IP address.
 
@@ -79,18 +79,17 @@ Note that the field is _meant_ to be overwritten. Plug does not actually do any 
 
 None of the available solutions I have seen are ideal. In this sort of plug, you want:
 
-* **Configurable Headers:**  With so many different headers being used, you should be able to configure the ones you need with minimal work.
-* **Configurable Proxies and Clients:** With multiple proxy hops, there may be several IPs in the forwarding headers. Without being able to tell the plug which of those IPs are actually known to be proxies, you may get one of them back as the `remote_ip`.
-* **Correctness:** Parsing forwarding headers can be surprisingly subtle. Most available libraries get it wrong.
+* **Configurable headers and parsers:** With so many different headers being used, you should be able to configure the ones you need and how to parse them.
+* **Configurable proxies and clients:** With multiple proxy hops, there may be several IPs in the forwarding headers. Without being able to tell the plug which of those IPs are actually known to be proxies, you may get one of them back as the `remote_ip`.
+* **Security and correctness:** Parsing forwarding headers can be surprisingly subtle, and it's easy to open yourself up to [IP spoofing](http://blog.gingerlime.com/2012/rails-ip-spoofing-vulnerabilities-and-protection/) vulnerabilities.
 
-The table below summarizes the problems with existing packages.
+Existing packages all fail on one or more of these fronts:
 
-|                                                                      | Headers?                 | Proxies?                 | Correct?                 | Notes                                                                                                                                                                                      |
-|----------------------------------------------------------------------|--------------------------|--------------------------|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [plug_cloudflare](https://hex.pm/packages/plug_cloudflare)           | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_minus_sign:       | Just for `CF-Connecting-IP`, not really a general purpose library                                                                                                                          |
-| [plug_forwarded_peer](https://hex.pm/packages/plug_forwarded_peer)   | :heavy_multiplication_x: | :heavy_multiplication_x: | :heavy_multiplication_x: | Only parses `Forwarded` and `X-Forwarded-For`, `X-Forwarded-For` takes precedence over `Forwarded`, does not parse all of RFC 7239's supported syntax correctly, vulnerable to IP spoofing |
-| [plug_x_forwarded_for](https://hex.pm/packages/plug_x_forwarded_for) | :heavy_minus_sign:       | :heavy_multiplication_x: | :heavy_multiplication_x: | Can only configure one header, all headers parsed the same as `X-Forwarded-For`, vulnerable to IP spoofing                                                                                 |
-| [remote_ip_rewriter](https://hex.pm/packages/remote_ip_rewriter)     | :heavy_multiplication_x: | :heavy_minus_sign:       | :heavy_check_mark:       | Only parses `X-Forwarded-For`, recognizes private/loopback IPs but known proxies are not configurable                                                                                      |
+* [plug\_cloudflare](https://hex.pm/packages/plug_cloudflare) - not a general purpose library, but is more secure & correct if you're specifically parsing the `CF-Connecting-IP`
+* [plug\_forwarded\_peer](https://hex.pm/packages/plug_forwarded_peer) - only parses `Forwarded` and `X-Forwarded-For` (`X-Forwarded-For` takes precedence over `Forwarded`), does not parse all of RFC 7239's supported syntax correctly, vulnerable to IP spoofing
+* [plug\_x\_forwarded\_for](https://hex.pm/packages/plug_x_forwarded_for) - only configurable for a single header, all headers parsed the same as `X-Forwarded-For`, vulnerable to IP spoofing
+* [remote\_ip\_rewriter](https://hex.pm/packages/remote_ip_rewriter) - can only configure one header, all headers parsed the same as `X-Forwarded-For`, cannot configure loopback/private IPs as known clients
+* [trusted\_proxy\_rewriter](https://hex.pm/packages/trusted_proxy_rewriter) - outdated fork of remote\_ip\_rewriter, has even more limited functionality
 
 **Solution:** These are the sorts of things application developers should not have to worry about. `RemoteIp` aims to be the proper solution to all of these problems.
 
