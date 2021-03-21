@@ -4,7 +4,7 @@ defmodule RemoteIp.Mixfile do
   def project do
     [
       app: :remote_ip,
-      version: "0.2.1",
+      version: "1.0.0",
       elixir: "~> 1.7",
       description: description(),
       package: package(),
@@ -21,8 +21,8 @@ defmodule RemoteIp.Mixfile do
   end
 
   defp description do
-    "A plug to overwrite the Conn's remote_ip based on headers such as " <>
-      "X-Forwarded-For."
+    "A plug to rewrite the Plug.Conn's remote_ip based on request headers" <>
+      " such as Forwarded, X-Forwarded-For, X-Client-Ip, and X-Real-Ip"
   end
 
   defp package do
