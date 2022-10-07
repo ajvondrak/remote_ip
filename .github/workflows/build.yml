@@ -18,18 +18,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - elixir: '1.7'
-            otp: '20'
-          - elixir: '1.8'
-            otp: '20'
-          - elixir: '1.9'
-            otp: '20'
-          - elixir: '1.10'
-            otp: '21'
-          - elixir: '1.11.3'
-            otp: '21'
-          - elixir: '1.11.3'
-            otp: '23'
+          - elixir: "1.7"
+            otp: "20"
+          - elixir: "1.8"
+            otp: "20"
+          - elixir: "1.9"
+            otp: "20"
+          - elixir: "1.10"
+            otp: "21"
+          - elixir: "1.11.3"
+            otp: "21"
+          - elixir: "1.11.3"
+            otp: "23"
+          - elixir: "1.14.0"
+            otp: "25"
 
     name: Elixir ${{ matrix.elixir }} (OTP ${{ matrix.otp }})
 
