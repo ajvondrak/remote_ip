@@ -111,7 +111,7 @@ defmodule RemoteIp.Debugger do
   if Version.match?(System.version(), "~> 1.10") do
     @debug Application.compile_env(:remote_ip, :debug, false)
   else
-    Code.eval_string("@debug Application.get_env(:remote_ip, :debug, false)")
+    @debug apply(Application, :get_env, [:remote_ip, :debug, false])
   end
 
   cond do

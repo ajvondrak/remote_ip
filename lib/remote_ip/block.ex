@@ -1,5 +1,5 @@
 defmodule RemoteIp.Block do
-  use Bitwise
+  import Bitwise
   alias __MODULE__
 
   @moduledoc false

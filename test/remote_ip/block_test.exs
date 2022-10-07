@@ -1,6 +1,6 @@
 defmodule RemoteIp.BlockTest do
   use ExUnit.Case, async: true
-  use Bitwise
+  import Bitwise
 
   alias RemoteIp.Block
 
