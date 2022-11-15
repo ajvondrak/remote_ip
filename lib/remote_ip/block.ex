@@ -76,13 +76,13 @@ defmodule RemoteIp.Block do
 
   defp process(:block, {:v4, ip}, prefix) when prefix in 0..32 do
     ones = 0xFFFFFFFF
-    <<mask::32>> = <<(bnot(ones >>> prefix))::32>>
+    <<mask::32>> = <<bnot(ones >>> prefix)::32>>
     {:ok, %Block{proto: :v4, net: ip &&& mask, mask: mask}}
   end
 
   defp process(:block, {:v6, ip}, prefix) when prefix in 0..128 do
     ones = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-    <<mask::128>> = <<(bnot(ones >>> prefix))::128>>
+    <<mask::128>> = <<bnot(ones >>> prefix)::128>>
     {:ok, %Block{proto: :v6, net: ip &&& mask, mask: mask}}
   end
 
