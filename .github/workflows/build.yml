@@ -13,7 +13,7 @@ env:
   MIX_ENV: ci
 
 # The approach to the CI matrix is as following:
-# * The minimum version of elixir is the minimum supported (see https://hexdocs.pm/elixir/compatibility-and-deprecations.html)
+# * The minimum version of Elixir is the minimum supported (see https://hexdocs.pm/elixir/compatibility-and-deprecations.html)
 # * Each Elixir version is paired with the lowest supported OTP version
 # * The latest Elixir version is paired also with the highest supported OTP version
 
@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:         
+        include:
           - elixir: '1.10'
             otp: '21'
           - elixir: '1.11'
