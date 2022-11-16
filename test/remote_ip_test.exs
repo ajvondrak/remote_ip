@@ -57,6 +57,14 @@ defmodule RemoteIpTest do
       assert Logger.metadata()[:remote_ip] == "86.75.30.9"
     end
 
+    test "invalid ip address" do
+      peer = "an invalid ip"
+      head = []
+      conn = %Plug.Conn{remote_ip: peer, req_headers: head}
+      assert call(conn).remote_ip == peer
+      assert Logger.metadata()[:remote_ip] == nil
+    end
+
     for {header, value} <- @unknown do
       test "#{header} header from unknown IP" do
         peer = {1, 2, 3, 4}

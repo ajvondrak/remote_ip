@@ -5,7 +5,7 @@ defmodule Debug.MixProject do
     [
       app: :debug,
       version: "0.0.0",
-      elixir: "~> 1.7",
+      elixir: "~> 1.10",
       deps: [remote_ip: [path: "../../.."]]
     ]
   end

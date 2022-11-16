@@ -12,24 +12,29 @@ on:
 env:
   MIX_ENV: ci
 
+# The approach to the CI matrix is as following:
+# * The minimum version of Elixir is the minimum supported (see https://hexdocs.pm/elixir/compatibility-and-deprecations.html)
+# * Each Elixir version is paired with the lowest supported OTP version
+# * The latest Elixir version is paired also with the highest supported OTP version
+
 jobs:
   ci:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - elixir: '1.7'
-            otp: '20'
-          - elixir: '1.8'
-            otp: '20'
-          - elixir: '1.9'
-            otp: '20'
           - elixir: '1.10'
             otp: '21'
-          - elixir: '1.11.3'
+          - elixir: '1.11'
             otp: '21'
-          - elixir: '1.11.3'
+          - elixir: '1.12'
+            otp: '22'
+          - elixir: '1.13'
+            otp: '22'
+          - elixir: '1.14'
             otp: '23'
+          - elixir: '1.14'
+            otp: '25'
 
     name: Elixir ${{ matrix.elixir }} (OTP ${{ matrix.otp }})
 

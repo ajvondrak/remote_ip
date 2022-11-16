@@ -1,5 +1,4 @@
-# TODO: `import Config` when our minimum supported Elixir is ~> 1.9
-use Mix.Config
+import Config
 
 config :logger, :console,
   colors: [enabled: false],
