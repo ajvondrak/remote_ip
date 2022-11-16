@@ -12,10 +12,18 @@ on:
 env:
   MIX_ENV: ci
 
-# The approach to the CI matrix is as following:
-# * The minimum version of Elixir is the minimum supported (see https://hexdocs.pm/elixir/compatibility-and-deprecations.html)
-# * Each Elixir version is paired with the lowest supported OTP version
-# * The latest Elixir version is paired also with the highest supported OTP version
+# The approach to the CI matrix:
+#
+# * In general, remote_ip only maintains support for the minimum supported
+#   version of Elixir, so we only need to test the versions listed in
+#   https://hexdocs.pm/elixir/compatibility-and-deprecations.html
+#
+# * To avoid combinatorial explosion of Elixir/OTP pairs, and to err on the
+#   side of caution, each Elixir version is paired with its lowest supported
+#   OTP version.
+#
+# * Additionally, the highest Elixir version is also paired with its highest
+#   supported OTP version, to cover the latest & greatest case.
 
 jobs:
   ci:
