@@ -50,17 +50,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - id: install
         name: Install Elixir
-        uses: erlef/setup-elixir@v1
+        uses: erlef/setup-beam@v1
         with:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
 
       - name: Restore cached build
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: builds@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
           path: |
@@ -82,7 +82,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore cached integrations
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: integrations@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('integration/tests/*/mix.lock') }}
           path: |
@@ -93,7 +93,7 @@ jobs:
         run: mix integrate
 
       - name: Restore cached PLTs
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           key: plts@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
           path: |
