@@ -39,7 +39,8 @@ defmodule RemoteIp.Mixfile do
       {:plug, "~> 1.14"},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false},
       {:dialyxir, "~> 1.2", only: [:ci, :dev], runtime: false},
-      {:excoveralls, "~> 0.15", only: [:ci, :test], runtime: false}
+      {:excoveralls, "~> 0.18", only: [:ci, :test], runtime: false},
+      {:castore, "~> 1.0", only: [:ci, :test], runtime: false}
     ]
   end
 
