@@ -5,7 +5,7 @@ defmodule Parsers.MixProject do
     [
       app: :parsers,
       version: "0.0.0",
-      elixir: "~> 1.10",
+      elixir: "~> 1.12",
       deps: [remote_ip: [path: "../../.."]]
     ]
   end

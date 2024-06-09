@@ -5,7 +5,7 @@ defmodule Purge.MixProject do
     [
       app: :purge,
       version: "0.0.0",
-      elixir: "~> 1.10",
+      elixir: "~> 1.12",
       deps: [remote_ip: [path: "../../.."]]
     ]
   end
