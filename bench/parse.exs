@@ -4,7 +4,7 @@ cidrs = Bench.Inputs.cidrs(1_000)
 
 suite = %{
   remote_ip: fn -> Enum.each(cidrs, &RemoteIp.Block.parse!/1) end,
-  inet_cidr: fn -> Enum.each(cidrs, &InetCidr.parse(&1, true)) end,
+  inet_cidr: fn -> Enum.each(cidrs, &InetCidr.parse_cidr!(&1, true)) end,
   cider: fn -> Enum.each(cidrs, &Cider.parse/1) end,
   cidr: fn -> Enum.each(cidrs, &CIDR.parse/1) end,
 }

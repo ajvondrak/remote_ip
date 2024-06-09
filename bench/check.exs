@@ -13,7 +13,7 @@ cidrs = Bench.Inputs.cidrs(1_000)
 
 parsed_cidrs = %{
   remote_ip: Enum.map(cidrs, &RemoteIp.Block.parse!/1),
-  inet_cidr: Enum.map(cidrs, &InetCidr.parse(&1, true)),
+  inet_cidr: Enum.map(cidrs, &InetCidr.parse_cidr!(&1, true)),
   cider: Enum.map(cidrs, &Cider.parse/1),
   cidr: Enum.map(cidrs, &CIDR.parse/1),
 }
