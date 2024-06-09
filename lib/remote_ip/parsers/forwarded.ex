@@ -131,7 +131,7 @@ defmodule RemoteIp.Parsers.Forwarded do
     # example, the port "12345" would be matched by fixed_integer(1) and the
     # remaining "2345" would cause a parse error for the eof in ip_address/0.
 
-    choice(Enum.map(5..1, &fixed_integer/1))
+    choice(Enum.map(5..1//-1, &fixed_integer/1))
   end
 
   defp obfuscated do
