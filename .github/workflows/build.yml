@@ -32,9 +32,9 @@ jobs:
       matrix:
         include:
           - elixir: '1.12'
-            otp: '22'
+            otp: '23'
           - elixir: '1.13'
-            otp: '22'
+            otp: '23'
           - elixir: '1.14'
             otp: '23'
           - elixir: '1.15'
