@@ -95,27 +95,37 @@ defmodule RemoteIp.Debugger do
 
   @spec debug(atom(), [any()], do: any()) :: any()
 
-  defmacro debug(id, inputs \\ [], do: output) do
-    if debug?(id) do
+  defmacro debug(id, inputs \\ [], block)
+
+  @debug Application.compile_env(:remote_ip, :debug, false)
+
+  # The body of `debug/3` is chosen here, once, from the compile-time config,
+  # rather than by branching on it inside the macro. A branch on a value the
+  # compiler can see is constant (`false` by default, or `true`) is an
+  # unreachable clause, which Elixir 1.20's type checker reports as a warning
+  # in every project that compiles `:remote_ip`.
+  cond do
+    @debug in [false, []] ->
+      defmacro debug(_id, _inputs, do: output), do: output
+
+    @debug == true ->
+      defmacro debug(id, inputs, do: output), do: instrument(id, inputs, output)
+
+    is_list(@debug) ->
+      defmacro debug(id, inputs, do: output) do
+        if id in @debug, do: instrument(id, inputs, output), else: output
+      end
+  end
+
+  if @debug not in [false, []] do
+    defp instrument(id, inputs, output) do
       quote do
         inputs = unquote(inputs)
         output = unquote(output)
         unquote(__MODULE__).__log__(unquote(id), inputs, output)
         output
       end
-    else
-      output
     end
-  end
-
-  @debug Application.compile_env(:remote_ip, :debug, false)
-
-  cond do
-    is_list(@debug) ->
-      defp debug?(id), do: Enum.member?(@debug, id)
-
-    is_boolean(@debug) ->
-      defp debug?(_), do: @debug
   end
 
   def __log__(id, inputs, output) do
