@@ -9,59 +9,62 @@ on:
     branches:
       - main
 
-env:
-  MIX_ENV: ci
+permissions: {}
 
-# The approach to the CI matrix:
-#
-# * In general, remote_ip only maintains support for the minimum supported
-#   version of Elixir, so we only need to test the versions listed in
-#   https://hexdocs.pm/elixir/compatibility-and-deprecations.html
-#
-# * To avoid combinatorial explosion of Elixir/OTP pairs, and to err on the
-#   side of caution, each Elixir version is paired with its lowest supported
-#   OTP version.
-#
-# * Additionally, the highest Elixir version is also paired with its highest
-#   supported OTP version, to cover the latest & greatest case.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ci:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - elixir: '1.12'
-            otp: '23'
-          - elixir: '1.13'
-            otp: '23'
-          - elixir: '1.14'
-            otp: '23'
-          - elixir: '1.15'
-            otp: '24'
-          - elixir: '1.16'
-            otp: '24'
-          - elixir: '1.16'
-            otp: '26'
-
     name: Elixir ${{ matrix.elixir }} (OTP ${{ matrix.otp }})
 
-    runs-on: ubuntu-20.04
+    env:
+      MIX_ENV: ci
 
+    strategy:
+      fail-fast: false
+      # https://hexdocs.pm/elixir/compatibility-and-deprecations.html
+      #
+      # We only test officially supported Elixir versions (as of whenever this
+      # workflow file was last updated, anyway). For each version of Elixir, we
+      # use the minimum supported OTP version. On the latest version of Elixir,
+      # we additionally test the maximum supported OTP version.
+      matrix:
+        include:
+          - elixir: '1.16' # supports OTP 24 - 26
+            otp: '24'
+          - elixir: '1.17' # supports OTP 25 - 27
+            otp: '25'
+          - elixir: '1.18' # supports OTP 25 - 27
+            otp: '25'
+          - elixir: '1.19' # supports OTP 26 - 28
+            otp: '26'
+          - elixir: '1.20' # supports OTP 27 - 29
+            otp: '27'
+          - elixir: '1.20'
+            otp: '29'
+
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - id: install
         name: Install Elixir
-        uses: erlef/setup-beam@v1
+        uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1
         with:
           otp-version: ${{ matrix.otp }}
           elixir-version: ${{ matrix.elixir }}
 
       - name: Restore cached build
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: builds@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
           path: |
@@ -80,10 +83,10 @@ jobs:
       - name: Run unit tests
         run: mix coveralls.github
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Restore cached integrations
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: integrations@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('integration/tests/*/mix.lock') }}
           path: |
@@ -94,7 +97,7 @@ jobs:
         run: mix integrate
 
       - name: Restore cached PLTs
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: plts@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-${{ hashFiles('mix.lock') }}
           path: |
@@ -103,4 +106,4 @@ jobs:
             plts@elixir-${{ steps.install.outputs.elixir-version }}-otp-${{ steps.install.outputs.otp-version }}-mix-
 
       - name: Run dialyzer
-        run: mix dialyzer
+        run: mix dialyzer --format github
