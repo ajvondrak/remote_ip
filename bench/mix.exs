@@ -5,7 +5,7 @@ defmodule Bench.MixProject do
     [
       app: :bench,
       version: "0.0.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.16",
       deps: deps()
     ]
   end

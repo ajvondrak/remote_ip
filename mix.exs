@@ -5,7 +5,7 @@ defmodule RemoteIp.Mixfile do
     [
       app: :remote_ip,
       version: "1.2.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.16",
       description: description(),
       package: package(),
       deps: deps(),
@@ -36,8 +36,8 @@ defmodule RemoteIp.Mixfile do
   defp deps do
     [
       {:combine, "~> 0.10"},
-      {:plug, "~> 1.14"},
-      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:plug, "~> 1.16"},
+      {:ex_doc, "~> 0.40", only: :dev, runtime: false},
       {:dialyxir, "~> 1.4", only: [:ci, :dev], runtime: false},
       {:excoveralls, "~> 0.18", only: [:ci, :test], runtime: false},
       {:castore, "~> 1.0", only: [:ci, :test], runtime: false}

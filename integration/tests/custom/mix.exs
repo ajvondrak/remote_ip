@@ -5,7 +5,7 @@ defmodule Custom.MixProject do
     [
       app: :custom,
       version: "0.0.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.16",
       deps: [remote_ip: [path: "../../.."]]
     ]
   end
