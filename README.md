@@ -18,7 +18,7 @@ Add `:remote_ip` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:remote_ip, "~> 1.2"}]
+  [{:remote_ip, "~> 1.3"}]
 end
 ```
 
